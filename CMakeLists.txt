@@ -127,3 +127,6 @@ granulr_add_console_tool(granulr_bench ${GRANULR_BENCH_SOURCES})
 
 enable_testing()
 add_test(NAME granulr_unit_tests COMMAND granulr_tests)
+
+# Off-screen screenshot tool (layout checks and README screenshots).
+granulr_add_console_tool(granulr_shot "${CMAKE_CURRENT_SOURCE_DIR}/scripts/screenshot/ShotMain.cpp")
