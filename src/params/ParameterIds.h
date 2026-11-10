@@ -235,6 +235,12 @@ inline juce::String modDestParamId (int d)
     return {};
 }
 
+/** True for sources that only go from 0 to 1. */
+inline bool modSourceIsUnipolar (int s)
+{
+    return (s >= srcEnv && s <= srcMacro4) || s == srcBright || s == srcOnset || s == srcBounce;
+}
+
 inline constexpr int numModSlots = 32;
 inline constexpr int numPatternSteps = 16;
 inline constexpr int numHarmonyVoices = 4;

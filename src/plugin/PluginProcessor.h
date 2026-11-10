@@ -17,7 +17,7 @@ class PresetManager;
 class GranulrProcessor final : public juce::AudioProcessor
 {
 public:
-    static constexpr int stateVersion = 1;
+    static constexpr int stateVersion = 2;
 
     GranulrProcessor();
     ~GranulrProcessor() override;
@@ -59,6 +59,13 @@ public:
     grn::GrainEngine& getEngine() noexcept { return engine; }
     grn::PresetManager& getPresets() noexcept { return *presets; }
 
+    /** Recorded XY gesture replayed as two modulation sources (message thread only). */
+    void setGesture (const grn::GestureData& data);
+    const grn::GestureData& getGesture() const noexcept { return gestureCopy; }
+    uint32_t getGestureVersion() const noexcept { return gestureVersion.load(); }
+    static juce::ValueTree gestureToTree (const grn::GestureData& data);
+    static grn::GestureData gestureFromTree (const juce::ValueTree& tree);
+
     /** Editor settings saved with the plugin state (message thread only). */
     juce::ValueTree& getUiState() noexcept { return uiState; }
 
@@ -77,6 +84,10 @@ private:
     grn::GuiBridge bridge;
     std::unique_ptr<grn::PresetManager> presets;
     juce::ValueTree uiState { "UI" };
+
+    grn::TripleBuffer<grn::GestureData> gestureBuffer; // written by the message thread, read by the audio thread
+    grn::GestureData gestureCopy;
+    std::atomic<uint32_t> gestureVersion { 0 };
 
     double currentSampleRate = 48000.0;
     float bypassMix = 0.0f;         // 0 = processed, 1 = bypassed

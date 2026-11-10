@@ -223,12 +223,54 @@ void VisualEngine::drawGrains (Canvas& canvas, juce::Rectangle<float> area)
             continue;
         const float x = area.getRight() - juce::jlimit (0.0f, 1.0f, view.delayNorm) * w;
         const float y = mid - juce::jlimit (-1.0f, 1.0f, view.pitch / 24.0f) * (h * 0.5f - 8.0f);
-        const float size = 3.0f + 9.0f * view.level;
-        const auto colour = t.grain.interpolatedWith (t.warning, juce::jlimit (0.0f, 1.0f, view.pan)).withAlpha (0.25f + 0.75f * view.level);
+        // Far grains (Distance) are drawn smaller and fainter.
+        const float nearness = 1.0f - 0.6f * juce::jlimit (0.0f, 1.0f, view.depth);
+        const float size = (3.0f + 9.0f * view.level) * nearness;
+        const auto colour = t.grain.interpolatedWith (t.warning, juce::jlimit (0.0f, 1.0f, view.pan))
+                                .withAlpha ((0.25f + 0.75f * view.level) * nearness);
         canvas.fillRect ({ x - 1.5f, y - size * 0.5f, 3.0f, size }, colour);
     }
 
+    // Recorded gesture: its path, and a marker where the playback is now.
+    {
+        GestureData local;
+        bool recording = false;
+        {
+            const juce::SpinLock::ScopedLockType lock (overlayLock);
+            local.count = overlay.count;
+            recording = overlayRecording;
+            if (local.count > 1)
+                local = overlay;
+        }
+        if (local.count > 1)
+        {
+            auto toPoint = [&] (float gx, float gy)
+            {
+                return juce::Point<float> (area.getCentreX() + gx * w * 0.5f, mid - gy * (h * 0.5f - 8.0f));
+            };
+            if (static_cast<int> (scratch.size()) < local.count)
+                scratch.resize (static_cast<size_t> (local.count));
+            for (int i = 0; i < local.count; ++i)
+                scratch[static_cast<size_t> (i)] = toPoint (local.x[static_cast<size_t> (i)], local.y[static_cast<size_t> (i)]);
+            const auto colour = recording ? t.meterClip : t.sourceColour (srcGestureX);
+            canvas.polyline (scratch.data(), local.count, 1.5f, colour.withAlpha (recording ? 0.9f : 0.55f));
+            if (! recording)
+            {
+                const auto now = toPoint (bridge.sourceValue[srcGestureX].load (std::memory_order_relaxed),
+                                          bridge.sourceValue[srcGestureY].load (std::memory_order_relaxed));
+                canvas.fillRect ({ now.x - 3.0f, now.y - 3.0f, 6.0f, 6.0f }, colour);
+            }
+        }
+    }
+
     canvas.fillRect ({ area.getRight() - 2.0f, area.getY(), 2.0f, h }, frozen ? t.frozen : t.accent);
+}
+
+void VisualEngine::setGestureOverlay (const GestureData& data, bool recording)
+{
+    const juce::SpinLock::ScopedLockType lock (overlayLock);
+    overlay = data;
+    overlayRecording = recording;
 }
 
 void VisualEngine::drawOutput (Canvas& canvas, juce::Rectangle<float> area, int mode)
@@ -662,7 +704,16 @@ void GraphicsCanvas::spectrogram (juce::Rectangle<float> area, const Spectrogram
 VisualView::VisualView (GranulrProcessor& p, VisualEngine& e, Kind k) : processor (p), engine (e), kind (k)
 {
     if (kind == grains)
-        setTooltip ("Buffer: the last 8 seconds of audio, newest on the right. Each mark is a grain: its height is the pitch, its colour the pan.");
+    {
+        setTooltip ("Buffer: the last 8 seconds of audio, newest on the right. Each mark is a grain: its height is the pitch, "
+                    "its colour the pan. Drag to set Position and Pitch (Shift: position only). Alt + drag to draw the Position "
+                    "and Spray range. Rec: the next drag is recorded and replayed in a loop as the Gesture sources "
+                    "(right-click Rec to erase it).");
+        auto& state = processor.getState();
+        positionParam = state.getParameter (pid::position);
+        pitchParam = state.getParameter (pid::pitch);
+        sprayParam = state.getParameter (pid::spray);
+    }
     else
         setTooltip ("Output: what leaves the plugin. Click a name to change the view. Meters show input (grey) and output levels.");
 }
@@ -684,9 +735,184 @@ void VisualView::setSoftwareRendering (bool shouldDrawContent)
     repaint();
 }
 
+juce::Rectangle<int> VisualView::recButtonArea() const
+{
+    return { getWidth() - 118, 3, 34, kStripHeight - 5 };
+}
+
+void VisualView::endParamGestures()
+{
+    if (positionGesture) positionParam->endChangeGesture();
+    if (pitchGesture)    pitchParam->endChangeGesture();
+    if (sprayGesture)    sprayParam->endChangeGesture();
+    positionGesture = pitchGesture = sprayGesture = false;
+}
+
+void VisualView::applyPointDrag (const juce::MouseEvent& e)
+{
+    const auto plot = plotArea().toFloat();
+    if (positionGesture)
+    {
+        const float delay = juce::jlimit (0.0f, 1.0f, (plot.getRight() - static_cast<float> (e.x)) / plot.getWidth());
+        positionParam->setValueNotifyingHost (positionParam->convertTo0to1 (delay * GrainEngine::bufferSeconds * 1000.0f));
+    }
+    if (pitchGesture)
+    {
+        const float y = (plot.getCentreY() - static_cast<float> (e.y)) / (plot.getHeight() * 0.5f - 8.0f);
+        pitchParam->setValueNotifyingHost (pitchParam->convertTo0to1 (std::round (juce::jlimit (-1.0f, 1.0f, y) * 24.0f)));
+    }
+}
+
+void VisualView::applyRegionDrag (const juce::MouseEvent& e)
+{
+    // The grains read between Position and Position + Spray: the newest edge is the position.
+    const auto plot = plotArea().toFloat();
+    const float a = juce::jlimit (0.0f, 1.0f, (plot.getRight() - static_cast<float> (regionAnchorX)) / plot.getWidth());
+    const float b = juce::jlimit (0.0f, 1.0f, (plot.getRight() - static_cast<float> (e.x)) / plot.getWidth());
+    const float seconds = GrainEngine::bufferSeconds * 1000.0f;
+    if (positionGesture)
+        positionParam->setValueNotifyingHost (positionParam->convertTo0to1 (std::min (a, b) * seconds));
+    if (sprayGesture)
+        sprayParam->setValueNotifyingHost (sprayParam->convertTo0to1 (std::min (2000.0f, std::abs (a - b) * seconds)));
+}
+
+void VisualView::addGesturePoint (const juce::MouseEvent& e)
+{
+    const auto plot = plotArea().toFloat();
+    GesturePoint point;
+    point.seconds = juce::Time::getMillisecondCounterHiRes() * 0.001 - recordStart;
+    point.x = juce::jlimit (-1.0f, 1.0f, (static_cast<float> (e.x) - plot.getCentreX()) / (plot.getWidth() * 0.5f));
+    point.y = juce::jlimit (-1.0f, 1.0f, (plot.getCentreY() - static_cast<float> (e.y)) / (plot.getHeight() * 0.5f - 8.0f));
+    if (recorded.size() < 20000)
+        recorded.push_back (point);
+    engine.setGestureOverlay (buildGesture(), true);
+}
+
+/** Resamples the recorded path to evenly spaced points in time. */
+GestureData VisualView::buildGesture() const
+{
+    GestureData data;
+    if (recorded.size() < 2)
+        return data;
+    const double duration = recorded.back().seconds;
+    data.seconds = static_cast<float> (std::max (0.2, duration));
+    data.count = juce::jlimit (2, GestureData::maxPoints, static_cast<int> (duration * 60.0) + 2);
+    size_t index = 0;
+    for (int i = 0; i < data.count; ++i)
+    {
+        const double time = duration * static_cast<double> (i) / static_cast<double> (data.count - 1);
+        while (index + 2 < recorded.size() && recorded[index + 1].seconds < time)
+            ++index;
+        const auto& p0 = recorded[index];
+        const auto& p1 = recorded[index + 1];
+        const double span = p1.seconds - p0.seconds;
+        const auto t = static_cast<float> (span > 1.0e-9 ? juce::jlimit (0.0, 1.0, (time - p0.seconds) / span) : 0.0);
+        data.x[static_cast<size_t> (i)] = p0.x + t * (p1.x - p0.x);
+        data.y[static_cast<size_t> (i)] = p0.y + t * (p1.y - p0.y);
+    }
+    return data;
+}
+
+void VisualView::refresh()
+{
+    if (kind != grains || dragMode == dragRecord)
+        return;
+    const uint32_t version = processor.getGestureVersion();
+    if (version != shownGestureVersion)
+    {
+        shownGestureVersion = version;
+        engine.setGestureOverlay (processor.getGesture(), false);
+        repaint();
+    }
+}
+
+void VisualView::mouseDrag (const juce::MouseEvent& e)
+{
+    if (dragMode == dragPoint)
+        applyPointDrag (e);
+    else if (dragMode == dragRegion)
+        applyRegionDrag (e);
+    else if (dragMode == dragRecord)
+        addGesturePoint (e);
+}
+
+void VisualView::mouseUp (const juce::MouseEvent&)
+{
+    if (dragMode == dragRecord)
+    {
+        const auto gesture = buildGesture();
+        dragMode = dragNone;
+        recArmed = false;
+        if (gesture.count > 1 && recorded.back().seconds >= 0.15)
+        {
+            processor.setGesture (gesture);
+            // What was drawn is what plays: X moves the position, Y the pitch.
+            auto& matrix = processor.getMatrix();
+            if (matrix.findSlot (srcGestureX, dstPosition) < 0)
+                matrix.setRouting (srcGestureX, dstPosition, -0.5f);
+            if (matrix.findSlot (srcGestureY, dstPitch) < 0)
+                matrix.setRouting (srcGestureY, dstPitch, 0.5f);
+        }
+        shownGestureVersion = 0xffffffffu;
+        recorded.clear();
+        repaint();
+    }
+    endParamGestures();
+    dragMode = dragNone;
+}
+
 void VisualView::mouseDown (const juce::MouseEvent& e)
 {
-    if (kind != output || e.y > kStripHeight)
+    if (kind == grains)
+    {
+        if (recButtonArea().contains (e.getPosition()))
+        {
+            if (e.mods.isPopupMenu())
+            {
+                processor.setGesture ({});
+                recArmed = false;
+            }
+            else
+            {
+                recArmed = ! recArmed;
+            }
+            repaint();
+            return;
+        }
+        if (! plotArea().contains (e.getPosition()) || e.mods.isPopupMenu())
+            return;
+
+        const bool positionFree = processor.getState().getRawParameterValue (pid::positionSync)->load() < 0.5f;
+        if (recArmed)
+        {
+            dragMode = dragRecord;
+            recorded.clear();
+            recordStart = juce::Time::getMillisecondCounterHiRes() * 0.001;
+            addGesturePoint (e);
+        }
+        else if (e.mods.isAltDown())
+        {
+            dragMode = dragRegion;
+            regionAnchorX = e.x;
+            positionGesture = positionFree;
+            sprayGesture = true;
+            if (positionGesture) positionParam->beginChangeGesture();
+            sprayParam->beginChangeGesture();
+            applyRegionDrag (e);
+        }
+        else
+        {
+            dragMode = dragPoint;
+            positionGesture = positionFree;
+            pitchGesture = ! e.mods.isShiftDown();
+            if (positionGesture) positionParam->beginChangeGesture();
+            if (pitchGesture)    pitchParam->beginChangeGesture();
+            applyPointDrag (e);
+        }
+        return;
+    }
+
+    if (e.y > kStripHeight)
         return;
     const int tabWidth = 78;
     const int index = (e.x - 6) / tabWidth;
@@ -730,6 +956,16 @@ void VisualView::paint (juce::Graphics& g)
         g.setFont (Fonts::small());
         g.setColour (frozen ? t.frozen : t.textFaint);
         g.drawText (frozen ? "Frozen" : "Recording", strip.withTrimmedRight (8), juce::Justification::centredRight, false);
+
+        // Gesture recording button.
+        const auto rec = recButtonArea().toFloat();
+        const bool hasGesture = processor.getGesture().count > 1;
+        g.setColour (recArmed ? t.meterClip : t.control);
+        g.fillRoundedRectangle (rec, 3.0f);
+        g.setColour (recArmed ? t.meterClip : (hasGesture ? t.sourceColour (srcGestureX) : t.border));
+        g.drawRoundedRectangle (rec, 3.0f, 1.0f);
+        g.setColour (recArmed ? t.background : t.text);
+        g.drawText ("Rec", rec, juce::Justification::centred, false);
 
         g.setColour (t.textFaint);
         g.drawText ("8 s", plot.reduced (5, 3), juce::Justification::bottomLeft, false);

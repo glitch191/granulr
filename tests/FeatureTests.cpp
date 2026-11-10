@@ -7,6 +7,7 @@
 #include "dsp/Analysis.h"
 #include "dsp/Effects.h"
 #include "mod/Modulation.h"
+#include "state/PresetManager.h"
 
 using namespace grn;
 using namespace testutil;
@@ -399,6 +400,100 @@ public:
             const auto frozen = run (*processor, pulses (48000.0), 48000 * 10, 256, position, nullptr, true);
             expectEquals (allocationCount.load(), 0, "allocation while the frozen buffer evolves");
             expect (frozen.finite && frozen.peak <= 1.0f);
+        }
+
+        beginTest ("The gesture is saved with the plugin state and with presets, and it plays");
+        {
+            GestureData gesture;
+            gesture.count = 5;
+            gesture.seconds = 0.4f;
+            gesture.x = { -1.0f, -0.5f, 0.0f, 0.5f, 1.0f };
+            gesture.y = { 0.25f, 1.0f, -1.0f, 0.5f, -0.25f };
+
+            auto source = makeProcessor();
+            source->setGesture (gesture);
+            source->getMatrix().setRouting (srcGestureX, dstPosition, -0.5f);
+            juce::MemoryBlock state;
+            source->getStateInformation (state);
+
+            auto restored = makeProcessor();
+            restored->setStateInformation (state.getData(), static_cast<int> (state.getSize()));
+            const auto& copy = restored->getGesture();
+            expectEquals (copy.count, 5);
+            expectWithinAbsoluteError (copy.seconds, 0.4f, 1.0e-4f);
+            for (int i = 0; i < 5; ++i)
+            {
+                expectWithinAbsoluteError (copy.x[static_cast<size_t> (i)], gesture.x[static_cast<size_t> (i)], 1.0e-3f);
+                expectWithinAbsoluteError (copy.y[static_cast<size_t> (i)], gesture.y[static_cast<size_t> (i)], 1.0e-3f);
+            }
+
+            const auto sound = source->captureSoundState();
+            auto other = makeProcessor();
+            other->applySoundState (sound);
+            expectEquals (other->getGesture().count, 5);
+            other->applySoundState (makeProcessor()->captureSoundState());
+            expectEquals (other->getGesture().count, 0, "a sound without gesture must clear it");
+
+            // The audio thread replays it: the X source sweeps its whole range.
+            restored->getBridge().editorOpen.store (true);
+            int64_t position = 0;
+            float low = 1.0f, high = -1.0f;
+            for (int block = 0; block < 200; ++block)
+            {
+                run (*restored, noise (0.2f), 256, 256, position);
+                const float value = restored->getBridge().sourceValue[srcGestureX].load();
+                low = std::min (low, value);
+                high = std::max (high, value);
+            }
+            expect (low < -0.8f && high > 0.8f, "gesture playback range " + juce::String (low) + " to " + juce::String (high));
+        }
+
+        beginTest ("Mutate stays close, Breed stays between the parents, both can be undone");
+        {
+            auto processor = makeProcessor();
+            auto& presets = processor->getPresets();
+            presets.load (0);
+            std::array<bool, numParamGroups> locks {};
+            locks[groupPitch] = true;
+
+            auto normalised = [&] (const char* identifier) { return processor->getState().getParameter (identifier)->getValue(); };
+            const float sizeBefore = normalised (pid::size), pitchBefore = normalised (pid::pitch);
+            float largest = 0.0f;
+            for (int i = 0; i < 20; ++i)
+            {
+                presets.mutate (0.5f, locks);
+                largest = std::max (largest, std::abs (normalised (pid::size) - sizeBefore));
+                expectEquals (normalised (pid::pitch), pitchBefore, "locked group moved");
+                processor->getUndoManager().undo();
+                expectWithinAbsoluteError (normalised (pid::size), sizeBefore, 1.0e-4f);
+            }
+            expect (largest > 0.0f && largest <= 0.16f, "mutation size move " + juce::String (largest));
+
+            // Two different parents in slots A and B.
+            setParam (*processor, pid::size, 100.0f);
+            setParam (*processor, pid::windowShape, 0.0f);
+            presets.selectSlot (1);
+            setParam (*processor, pid::size, 900.0f);
+            setParam (*processor, pid::windowShape, 3.0f);
+            expect (presets.canBreed());
+            for (int i = 0; i < 20; ++i)
+            {
+                expect (presets.breed());
+                const float size = getParam (*processor, pid::size);
+                expect (size >= 99.0f && size <= 901.0f, "bred size " + juce::String (size));
+                const float shape = getParam (*processor, pid::windowShape);
+                expect (shape == 0.0f || shape == 3.0f, "bred choice must come from a parent");
+                processor->getUndoManager().undo();
+                expectWithinAbsoluteError (getParam (*processor, pid::size), 900.0f, 0.5f);
+            }
+
+            presets.makeVariations (0.5f, {});
+            expect (presets.hasVariations());
+            presets.loadVariation (2);
+            presets.loadVariation (-1);
+            expectWithinAbsoluteError (getParam (*processor, pid::size), 900.0f, 0.5f);
+            int64_t position = 0;
+            expect (run (*processor, noise (0.5f), 48000, 512, position).finite);
         }
     }
 };

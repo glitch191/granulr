@@ -240,6 +240,8 @@ void GranulrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
         EngineParams ep;
         ModSourceParams mp;
         readParams (ep, mp);
+        gestureBuffer.update();
+        mp.gesture = &gestureBuffer.read();
         ep.bpm = mp.bpm = bpm;
         ep.playing = mp.playing = playing;
 
@@ -364,11 +366,60 @@ void GranulrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
 }
 
 // ---------------------------------------------------------------------------------------------
+void GranulrProcessor::setGesture (const GestureData& data)
+{
+    gestureCopy = data;
+    gestureCopy.count = juce::jlimit (0, GestureData::maxPoints, gestureCopy.count);
+    if (gestureCopy.count < 2)
+        gestureCopy.count = 0;
+    gestureCopy.seconds = juce::jlimit (0.05f, 120.0f, gestureCopy.seconds);
+    gestureBuffer.writeBuffer() = gestureCopy;
+    gestureBuffer.publish();
+    gestureVersion.fetch_add (1);
+}
+
+juce::ValueTree GranulrProcessor::gestureToTree (const GestureData& data)
+{
+    juce::ValueTree tree ("GESTURE");
+    juce::StringArray xs, ys;
+    for (int i = 0; i < data.count; ++i)
+    {
+        xs.add (juce::String (data.x[static_cast<size_t> (i)], 3));
+        ys.add (juce::String (data.y[static_cast<size_t> (i)], 3));
+    }
+    tree.setProperty ("seconds", data.seconds, nullptr);
+    tree.setProperty ("x", xs.joinIntoString (" "), nullptr);
+    tree.setProperty ("y", ys.joinIntoString (" "), nullptr);
+    return tree;
+}
+
+GestureData GranulrProcessor::gestureFromTree (const juce::ValueTree& tree)
+{
+    GestureData data;
+    if (! tree.isValid())
+        return data;
+    juce::StringArray xs, ys;
+    xs.addTokens (tree.getProperty ("x").toString(), " ", "");
+    ys.addTokens (tree.getProperty ("y").toString(), " ", "");
+    xs.removeEmptyStrings();
+    ys.removeEmptyStrings();
+    data.count = juce::jmin (xs.size(), ys.size(), GestureData::maxPoints);
+    for (int i = 0; i < data.count; ++i)
+    {
+        data.x[static_cast<size_t> (i)] = juce::jlimit (-1.0f, 1.0f, xs[i].getFloatValue());
+        data.y[static_cast<size_t> (i)] = juce::jlimit (-1.0f, 1.0f, ys[i].getFloatValue());
+    }
+    data.seconds = tree.getProperty ("seconds", 1.0f);
+    return data;
+}
+
 juce::ValueTree GranulrProcessor::captureSoundState() const
 {
     juce::ValueTree sound ("SOUND");
     sound.addChild (const_cast<juce::AudioProcessorValueTreeState&> (apvts).copyState(), -1, nullptr);
     sound.addChild (matrix.toValueTree(), -1, nullptr);
+    if (gestureCopy.count > 1)
+        sound.addChild (gestureToTree (gestureCopy), -1, nullptr);
     return sound;
 }
 
@@ -401,6 +452,7 @@ void GranulrProcessor::applySoundState (const juce::ValueTree& soundState)
     }
 
     matrix.fromValueTree (soundState.getChildWithName ("MATRIX"));
+    setGesture (gestureFromTree (soundState.getChildWithName ("GESTURE")));
 }
 
 void GranulrProcessor::getStateInformation (juce::MemoryBlock& destData)
@@ -410,6 +462,8 @@ void GranulrProcessor::getStateInformation (juce::MemoryBlock& destData)
     root.setProperty ("pluginVersion", GRANULR_VERSION_STRING, nullptr);
     root.addChild (apvts.copyState(), -1, nullptr);
     root.addChild (matrix.toValueTree(), -1, nullptr);
+    if (gestureCopy.count > 1)
+        root.addChild (gestureToTree (gestureCopy), -1, nullptr);
     root.addChild (uiState.createCopy(), -1, nullptr);
     root.addChild (presets->toValueTree(), -1, nullptr);
 
@@ -427,7 +481,8 @@ void GranulrProcessor::setStateInformation (const void* data, int sizeInBytes)
     if (! root.hasType ("GRANULR"))
         return;
 
-    // Version 1 is the first format. Later versions migrate older trees here before use.
+    // Version 2 added parameters, sources and the gesture: a version 1 tree needs no migration,
+    // because whatever it does not contain keeps its neutral default.
     const int version = root.getProperty ("stateVersion", 1);
     juce::ignoreUnused (version);
 
@@ -435,6 +490,7 @@ void GranulrProcessor::setStateInformation (const void* data, int sizeInBytes)
     if (parameters.isValid())
         apvts.replaceState (parameters.createCopy());
     matrix.fromValueTree (root.getChildWithName ("MATRIX"));
+    setGesture (gestureFromTree (root.getChildWithName ("GESTURE")));
 
     const auto ui = root.getChildWithName ("UI");
     if (ui.isValid())

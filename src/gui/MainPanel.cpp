@@ -61,13 +61,33 @@ public:
             knobs.add (&owner.addKnob (*this, pid::randRate (n), "Rate"));
             knobs.add (&owner.addKnob (*this, pid::randSmooth (n), "Smooth"));
         }
-        else
+        else if (source == srcEnv)
         {
             topChoice = &owner.addChoice (*this, pid::envSource);
             knobs.add (&owner.addKnob (*this, pid::envAttack, "Attack"));
             knobs.add (&owner.addKnob (*this, pid::envRelease, "Release"));
             knobs.add (&owner.addKnob (*this, pid::envGain, "Gain"));
         }
+        else if (source == srcDrift)
+        {
+            knobs.add (&owner.addKnob (*this, pid::driftRate, "Rate"));
+            knobs.add (&owner.addKnob (*this, pid::driftPull, "Pull"));
+        }
+        else if (source == srcChaos)
+        {
+            knobs.add (&owner.addKnob (*this, pid::chaosRate, "Rate"));
+            knobs.add (&owner.addKnob (*this, pid::chaosShape, "Shape"));
+        }
+        else if (source == srcBounce)
+        {
+            knobs.add (&owner.addKnob (*this, pid::bounceRate, "Rate"));
+            knobs.add (&owner.addKnob (*this, pid::bounceDamp, "Damping"));
+        }
+    }
+
+    static bool existsFor (int source)
+    {
+        return source <= srcEnv || source == srcDrift || source == srcChaos || source == srcBounce;
     }
 
     void resized() override
@@ -160,7 +180,7 @@ MainPanel::MainPanel (UiContext& c, VisualEngine& engine)
 
     randomButton.setTooltip ("Randomize the unlocked parameter groups. Undo brings the previous sound back.");
     randomButton.onClick = [this, &presets] { presets.randomise (randomAmount, randomLocks); };
-    randomOptions.setTooltip ("Randomize options: amount and locked groups.");
+    randomOptions.setTooltip ("Randomize options (amount, locked groups) and variations: Mutate, Breed A x B, six variations to try.");
     randomOptions.onClick = [this] { showRandomMenu(); };
 
     undoButton.setTooltip ("Undo the last change (Ctrl + Z).");
@@ -214,7 +234,8 @@ MainPanel::MainPanel (UiContext& c, VisualEngine& engine)
     outputView.setMode (ui.getProperty ("visualMode", visSpectrum));
     outputView.onModeChanged = [this] (int mode) { processor.getUiState().setProperty ("visualMode", mode, nullptr); };
 
-    for (auto* section : { &grainsSection, &outputSection, &pitchSection, &triggerSection, &effectsSection, &modSection })
+    for (auto* section : { &grainsSection, &outputSection, &pitchSection, &triggerSection, &cloudSection, &bufferSection,
+                           &resonatorSection, &effectsSection, &modSection })
         addAndMakeVisible (section);
 
     // Grains ----------------------------------------------------------------------------------
@@ -265,6 +286,20 @@ MainPanel::MainPanel (UiContext& c, VisualEngine& engine)
     patternRate = &addChoice (triggerSection, pid::patternRate);
     lengthKnob = &addKnob (triggerSection, pid::patternLength, "Length", true);
     triggerSection.addAndMakeVisible (stepGrid);
+    onsetKnobs.addArray ({ &addKnob (triggerSection, pid::onsetSens, "Sensitivity"), &addKnob (triggerSection, pid::onsetBurst, "Burst") });
+    onsetHint = &addCaption (triggerSection, "Each attack of the input starts a burst of grains. Density sets their spacing.");
+    onsetHint->setMinimumHorizontalScale (0.8f);
+
+    // Cloud, buffer, resonator ----------------------------------------------------------------
+    cloudKnobs.addArray ({ &addKnob (cloudSection, pid::flock, "Flock"), &addKnob (cloudSection, pid::distance, "Distance"),
+                           &addKnob (cloudSection, pid::orbit, "Orbit"), &addKnob (cloudSection, pid::doppler, "Doppler") });
+    bufferKnobs.addArray ({ &addKnob (bufferSection, pid::evolve, "Evolve"), &addKnob (bufferSection, pid::wear, "Wear") });
+    bufferHint = &addCaption (bufferSection, "Active while frozen");
+    bufferHint->setJustificationType (juce::Justification::centredRight);
+    resOn = &addButton (resonatorSection, pid::resOn, "On");
+    resPlace = &addChoice (resonatorSection, pid::resPlace);
+    resKnobs.addArray ({ &addKnob (resonatorSection, pid::resMix, "Mix"), &addKnob (resonatorSection, pid::resDecay, "Decay"),
+                         &addKnob (resonatorSection, pid::resDamp, "Damping"), &addKnob (resonatorSection, pid::resOctave, "Octave") });
 
     // Effects ---------------------------------------------------------------------------------
     filterOn = &addButton (effectsSection, pid::filterOn, "Filter");
@@ -283,8 +318,9 @@ MainPanel::MainPanel (UiContext& c, VisualEngine& engine)
     // Modulation ------------------------------------------------------------------------------
     for (int s = 0; s < numModSources; ++s)
         modSection.addAndMakeVisible (chips.add (new ModSourceChip (context, s)));
-    for (int s = 0; s <= srcEnv; ++s)
-        modSection.addChildComponent (sourceEditors.add (new SourceEditor (*this, s)));
+    for (int s = 0; s < numModSources; ++s)
+        if (SourceEditor::existsFor (s))
+            modSection.addChildComponent (sourceEditors.add (new SourceEditor (*this, s)));
     sourceHint.setFont (Fonts::small());
     sourceHint.setColour (juce::Label::textColourId, t.textFaint);
     sourceHint.setJustificationType (juce::Justification::centred);
@@ -400,8 +436,8 @@ void MainPanel::resized()
     layoutHeader (area.removeFromTop (t.headerHeight - 2 * kMargin));
     area.removeFromTop (kGap);
 
-    const int fixed = kRowHeight * 2 + kEffectsHeight + kGap * 3;
-    const bool showMod = modOpen && area.getHeight() - fixed - (kModHeight + kGap) >= 110;
+    const int fixed = kRowHeight * 3 + kEffectsHeight + kGap * 4;
+    const bool showMod = modOpen && area.getHeight() - fixed - (kModHeight + kGap) >= 100;
     modSection.setVisible (showMod);
     if (showMod)
     {
@@ -410,6 +446,14 @@ void MainPanel::resized()
     }
     effectsSection.setBounds (area.removeFromBottom (kEffectsHeight));
     area.removeFromBottom (kGap);
+
+    auto row3 = area.removeFromBottom (kRowHeight);
+    area.removeFromBottom (kGap);
+    cloudSection.setBounds (row3.removeFromLeft (row3.getWidth() * 34 / 100));
+    row3.removeFromLeft (kGap);
+    bufferSection.setBounds (row3.removeFromLeft (row3.getWidth() * 30 / 100));
+    row3.removeFromLeft (kGap);
+    resonatorSection.setBounds (row3);
 
     auto row2 = area.removeFromBottom (kRowHeight);
     area.removeFromBottom (kGap);
@@ -431,6 +475,7 @@ void MainPanel::resized()
     layoutOutput();
     layoutPitch();
     layoutTrigger();
+    layoutCloudRow();
     layoutEffects();
     if (showMod)
         layoutModulation();
@@ -545,9 +590,33 @@ void MainPanel::layoutTrigger()
     stepCaption->setBounds (row.removeFromLeft (32));
     patternRate->setBounds (row);
 
+    // Onset mode shows its two controls where the pattern editor is.
+    auto onsetArea = area;
+    placeKnobs (onsetArea.removeFromLeft (140), onsetKnobs);
+    onsetArea.removeFromLeft (8);
+    onsetHint->setBounds (onsetArea);
+
     lengthKnob->setBounds (area.removeFromLeft (50).withSizeKeepingCentre (50, Knob::heightFor (true)));
     area.removeFromLeft (4);
     stepGrid.setBounds (area.reduced (0, 1));
+}
+
+void MainPanel::layoutCloudRow()
+{
+    placeKnobs (cloudSection.contentArea(), cloudKnobs);
+
+    auto buffer = bufferSection.contentArea();
+    placeKnobs (buffer.removeFromLeft (juce::jmin (140, buffer.getWidth() * 3 / 5)), bufferKnobs);
+    bufferHint->setBounds (buffer.reduced (4, 0));
+
+    auto resonator = resonatorSection.contentArea();
+    auto left = resonator.removeFromLeft (104);
+    resonator.removeFromLeft (8);
+    left.removeFromTop (8);
+    resOn->setBounds (left.removeFromTop (kControlHeight).removeFromLeft (52));
+    left.removeFromTop (4);
+    resPlace->setBounds (left.removeFromTop (kControlHeight));
+    placeKnobs (resonator.withWidth (juce::jmin (resonator.getWidth(), 280)), resKnobs);
 }
 
 void MainPanel::layoutEffects()
@@ -590,21 +659,22 @@ void MainPanel::layoutModulation()
 {
     auto area = modSection.contentArea();
 
-    // Chips: two columns.
-    auto chipArea = area.removeFromLeft (204);
-    area.removeFromLeft (10);
-    const int rows = (chips.size() + 1) / 2;
+    // Chips: three columns.
+    constexpr int columns = 3, chipWidth = 82;
+    auto chipArea = area.removeFromLeft (columns * chipWidth);
+    area.removeFromLeft (8);
+    const int rows = (chips.size() + columns - 1) / columns;
     const int chipHeight = juce::jmin (21, chipArea.getHeight() / rows);
     for (int i = 0; i < chips.size(); ++i)
     {
         const int column = i / rows, r = i % rows;
-        chips[i]->setBounds (chipArea.getX() + column * 103, chipArea.getY() + r * chipHeight, 101, chipHeight - 1);
+        chips[i]->setBounds (chipArea.getX() + column * chipWidth, chipArea.getY() + r * chipHeight, chipWidth - 2, chipHeight - 1);
     }
 
     matrixView.setBounds (area.removeFromRight (juce::jmax (260, area.getWidth() * 38 / 100)));
-    area.removeFromRight (10);
-    placeKnobs (area.removeFromRight (juce::jmin (232, area.getWidth() / 2)), macroKnobs);
-    area.removeFromRight (10);
+    area.removeFromRight (8);
+    placeKnobs (area.removeFromRight (juce::jmin (212, area.getWidth() / 2)), macroKnobs);
+    area.removeFromRight (8);
     for (auto* editor : sourceEditors)
         editor->setBounds (area.reduced (0, 8));
     sourceHint.setBounds (area);
@@ -622,12 +692,33 @@ void MainPanel::showRandomMenu()
     for (int g = 0; g < numParamGroups; ++g)
         menu.addItem (200 + g, groupNames[g], true, randomLocks[static_cast<size_t> (g)]);
 
+    // Variations stay close to the current sound, unlike Randomize. They use the amount and locks above.
+    auto& presets = processor.getPresets();
+    menu.addSectionHeader ("Variations of this sound");
+    menu.addItem (300, "Mutate");
+    menu.addItem (301, "Breed A x B", presets.canBreed());
+    menu.addItem (302, "Make 6 variations");
+    for (int v = 0; v < PresetManager::numVariations; ++v)
+        menu.addItem (310 + v, "Variation " + juce::String (v + 1), presets.hasVariations());
+    menu.addItem (309, "Back to original", presets.hasVariations());
+
     juce::Component::SafePointer<MainPanel> safe (this);
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (randomOptions), [safe] (int result)
     {
         if (safe == nullptr || result == 0)
             return;
-        if (result >= 200)
+        auto& manager = safe->processor.getPresets();
+        if (result == 300)
+            manager.mutate (safe->randomAmount, safe->randomLocks);
+        else if (result == 301)
+            manager.breed();
+        else if (result == 302)
+            manager.makeVariations (safe->randomAmount, safe->randomLocks);
+        else if (result == 309)
+            manager.loadVariation (-1);
+        else if (result >= 310)
+            manager.loadVariation (result - 310);
+        else if (result >= 200)
             safe->randomLocks[static_cast<size_t> (result - 200)] = ! safe->randomLocks[static_cast<size_t> (result - 200)];
         else
             safe->randomAmount = static_cast<float> (result) / 100.0f;
@@ -654,12 +745,21 @@ void MainPanel::updateSourceEditors()
     const int selected = context.selectedSource;
     for (auto* editor : sourceEditors)
         editor->setVisible (editor->source == selected);
-    const bool hasEditor = selected >= 0 && selected <= srcEnv;
+    const bool hasEditor = selected >= 0 && SourceEditor::existsFor (selected);
     sourceHint.setVisible (! hasEditor);
-    sourceHint.setText (selected >= srcMacro1
-                            ? juce::String (modSourceName (selected)) + ": drag its chip onto a knob, then turn the macro knob."
-                            : juce::String ("Select a source to edit it. Drag a source onto a knob to modulate it."),
-                        juce::dontSendNotification);
+
+    juce::String hint ("Select a source to edit it. Drag a source onto a knob to modulate it.");
+    if (selected >= srcMacro1 && selected <= srcMacro4)
+        hint = juce::String (modSourceName (selected)) + ": drag its chip onto a knob, then turn the macro knob.";
+    else if (selected == srcPitch)
+        hint = "Pitch: follows the note played at the input, two octaves around middle C. Holds while there is no clear note.";
+    else if (selected == srcBright)
+        hint = "Brightness: follows how bright the input is, from dull to sharp.";
+    else if (selected == srcOnset)
+        hint = "Onset: jumps to full on each attack of the input, then falls back with the Envelope release time.";
+    else if (selected == srcGestureX || selected == srcGestureY)
+        hint = "Gesture: press Rec above the buffer and draw in it. The movement is replayed in a loop (X: across, Y: up and down).";
+    sourceHint.setText (hint, juce::dontSendNotification);
 }
 
 void MainPanel::updateEnablement()
@@ -672,10 +772,18 @@ void MainPanel::updateEnablement()
     sizeDiv->setEnabled (sizeSynced);
 
     const int mode = modeChoice->getSelectedItemIndex();
-    densityKnob->setEnabled (mode == triggerFree);
+    densityKnob->setEnabled (mode == triggerFree || mode == triggerOnset);
     densityDiv->setEnabled (mode == triggerSync);
     patternRate->setEnabled (mode == triggerPattern);
     lengthKnob->setEnabled (mode == triggerPattern);
+    const bool onsetMode = mode == triggerOnset;
+    for (auto* knob : onsetKnobs) knob->setVisible (onsetMode);
+    onsetHint->setVisible (onsetMode);
+    lengthKnob->setVisible (! onsetMode);
+    stepGrid.setVisible (! onsetMode);
+
+    for (auto* knob : resKnobs) knob->setEnabled (resOn->getToggleState());
+    resPlace->setEnabled (resOn->getToggleState());
 
     for (auto* knob : filterKnobs) knob->setEnabled (filterOn->getToggleState());
     filterType->setEnabled (filterOn->getToggleState());
@@ -698,6 +806,7 @@ void MainPanel::refresh (double nowSeconds)
     for (auto* chip : chips)
         chip->refresh();
     stepGrid.refresh();
+    grainView.refresh();
 
     if (nowSeconds - lastSlowRefresh < 0.1)
         return;

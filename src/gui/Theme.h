@@ -46,7 +46,9 @@ struct Theme
     juce::Colour sourceColours[numModSources] {
         juce::Colour (0xffe8a23d), juce::Colour (0xffd9655b), juce::Colour (0xffb77be0), juce::Colour (0xff5b9be8),
         juce::Colour (0xff6cc56a), juce::Colour (0xff3fc1c9), juce::Colour (0xffe87bb0),
-        juce::Colour (0xfff2d15c), juce::Colour (0xfff29a5c), juce::Colour (0xff9ad1f2), juce::Colour (0xffc4f25c)
+        juce::Colour (0xfff2d15c), juce::Colour (0xfff29a5c), juce::Colour (0xff9ad1f2), juce::Colour (0xffc4f25c),
+        juce::Colour (0xff8fd6a0), juce::Colour (0xffe6c36a), juce::Colour (0xffe07a5f), juce::Colour (0xff7fb4d9),
+        juce::Colour (0xffc58be0), juce::Colour (0xff5fd0b0), juce::Colour (0xffe890c8), juce::Colour (0xffb0a0f0)
     };
 
     // Typography (sizes at 100 % zoom)

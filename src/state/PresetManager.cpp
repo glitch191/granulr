@@ -329,7 +329,10 @@ void PresetManager::randomise (float amount, const std::array<bool, numParamGrou
         const int routes = juce::roundToInt (amount * 6.0f);
         for (int r = 0; r < routes; ++r)
         {
-            const int source = random.nextInt (srcEnv + 1);
+            // Sources that move on their own or follow the input (macros and gesture need the user).
+            static const int liveSources[] { srcLfo1, srcLfo2, srcLfo3, srcLfo4, srcRand1, srcRand2, srcEnv,
+                                             srcPitch, srcBright, srcOnset, srcDrift, srcChaos, srcBounce };
+            const int source = liveSources[random.nextInt (static_cast<int> (std::size (liveSources)))];
             const int dest = musicalDests[random.nextInt (static_cast<int> (std::size (musicalDests)))];
             const float depth = (random.nextFloat() * 2.0f - 1.0f) * (0.1f + 0.35f * amount);
             matrix.setRouting (source, dest, depth);
@@ -339,6 +342,166 @@ void PresetManager::randomise (float amount, const std::array<bool, numParamGrou
 
     processor.getState().copyState();
     undo.beginNewTransaction();
+    sendChangeMessage();
+}
+
+// ---------------------------------------------------------------------------------------------
+namespace
+{
+    /** Writes a normalised value into a PARAMETERS tree, snapped to a legal value. */
+    void writeToTree (juce::ValueTree& parameters, juce::RangedAudioParameter& param, float normalised)
+    {
+        const float value = param.getNormalisableRange().snapToLegalValue (
+            param.convertFrom0to1 (juce::jlimit (0.0f, 1.0f, normalised)));
+        auto child = parameters.getChildWithProperty ("id", param.getParameterID());
+        if (! child.isValid())
+        {
+            child = juce::ValueTree ("PARAM");
+            child.setProperty ("id", param.getParameterID(), nullptr);
+            parameters.addChild (child, -1, nullptr);
+        }
+        child.setProperty ("value", value, nullptr);
+    }
+
+    juce::ValueTree parametersOf (juce::ValueTree& sound)
+    {
+        auto parameters = sound.getChildWithName ("PARAMETERS");
+        if (! parameters.isValid())
+        {
+            parameters = juce::ValueTree ("PARAMETERS");
+            sound.addChild (parameters, 0, nullptr);
+        }
+        return parameters;
+    }
+}
+
+juce::ValueTree PresetManager::mutatedState (const juce::ValueTree& soundState, float amount,
+                                             const std::array<bool, numParamGroups>& locked)
+{
+    amount = juce::jlimit (0.0f, 1.0f, amount);
+    auto result = soundState.createCopy();
+    auto parameters = parametersOf (result);
+
+    for (auto* base : processor.getParameters())
+    {
+        auto* param = dynamic_cast<juce::RangedAudioParameter*> (base);
+        if (param == nullptr)
+            continue;
+        const auto identifier = param->getParameterID();
+        const auto group = paramGroupOf (identifier);
+        if (group == groupNone || locked[static_cast<size_t> (group)])
+            continue;
+
+        float value = normalisedFromTree (parameters, *param);
+        if (isMorphable (*param))
+        {
+            // Sum of two uniform draws: most moves are small, a few are larger.
+            const float move = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.3f * amount;
+            value = juce::jlimit (0.0f, 1.0f, value + move);
+            if (identifier == pid::feedback)
+                value = juce::jmin (value, 0.85f);
+        }
+        else if (random.nextFloat() < 0.06f * amount)
+        {
+            const int steps = juce::jmax (2, param->getNumSteps());
+            value = static_cast<float> (random.nextInt (steps)) / static_cast<float> (steps - 1);
+        }
+        writeToTree (parameters, *param, value);
+    }
+
+    if (! locked[groupModulation])
+    {
+        auto matrix = result.getChildWithName ("MATRIX");
+        for (auto slot : matrix)
+        {
+            const float depth = slot.getProperty ("depth", 0.0f);
+            const float scaled = depth * (1.0f + 0.5f * amount * (random.nextFloat() * 2.0f - 1.0f));
+            slot.setProperty ("depth", juce::jlimit (-1.0f, 1.0f, scaled), nullptr);
+        }
+    }
+    return result;
+}
+
+juce::ValueTree PresetManager::crossedState (const juce::ValueTree& parentA, const juce::ValueTree& parentB)
+{
+    auto result = parentA.createCopy();
+    auto parameters = parametersOf (result);
+    const auto paramsA = parentA.getChildWithName ("PARAMETERS");
+    const auto paramsB = parentB.getChildWithName ("PARAMETERS");
+
+    // Each group mostly follows one parent, so a section of the sound stays coherent.
+    bool followsB[numParamGroups + 1];
+    for (auto& flag : followsB)
+        flag = random.nextBool();
+
+    for (auto* base : processor.getParameters())
+    {
+        auto* param = dynamic_cast<juce::RangedAudioParameter*> (base);
+        if (param == nullptr)
+            continue;
+        const auto identifier = param->getParameterID();
+        if (identifier == pid::bypass || identifier == pid::quality)
+            continue;
+        const auto group = paramGroupOf (identifier);
+        const bool fromB = followsB[group == groupNone ? numParamGroups : group];
+        const float a = normalisedFromTree (paramsA, *param);
+        const float b = normalisedFromTree (paramsB, *param);
+        float value = fromB ? b : a;
+        if (isMorphable (*param) && random.nextFloat() < 0.3f)
+            value = a + random.nextFloat() * (b - a);
+        writeToTree (parameters, *param, value);
+    }
+
+    // Routings and gesture come from the parent of the modulation group, plus a few of the other's.
+    const auto& main = followsB[groupModulation] ? parentB : parentA;
+    const auto& other = followsB[groupModulation] ? parentA : parentB;
+    result.removeChild (result.getChildWithName ("MATRIX"), nullptr);
+    result.removeChild (result.getChildWithName ("GESTURE"), nullptr);
+    auto matrix = main.getChildWithName ("MATRIX").createCopy();
+    if (! matrix.isValid())
+        matrix = juce::ValueTree ("MATRIX");
+    for (const auto& slot : other.getChildWithName ("MATRIX"))
+        if (matrix.getNumChildren() < numModSlots && random.nextFloat() < 0.35f)
+            matrix.addChild (slot.createCopy(), -1, nullptr);
+    result.addChild (matrix, -1, nullptr);
+    const auto gesture = main.getChildWithName ("GESTURE");
+    if (gesture.isValid())
+        result.addChild (gesture.createCopy(), -1, nullptr);
+    return result;
+}
+
+void PresetManager::mutate (float amount, const std::array<bool, numParamGroups>& locked)
+{
+    applyUndoable (mutatedState (processor.captureSoundState(), amount, locked), "Mutate");
+    sendChangeMessage();
+}
+
+bool PresetManager::breed()
+{
+    // The active slot is the live sound; the other slot must have been filled.
+    slots[activeSlot] = processor.captureSoundState();
+    if (! slots[1 - activeSlot].isValid())
+        return false;
+    applyUndoable (crossedState (slots[0], slots[1]), "Breed A x B");
+    sendChangeMessage();
+    return true;
+}
+
+void PresetManager::makeVariations (float amount, const std::array<bool, numParamGroups>& locked)
+{
+    variationOrigin = processor.captureSoundState();
+    for (auto& variation : variations)
+        variation = mutatedState (variationOrigin, amount, locked);
+}
+
+void PresetManager::loadVariation (int index)
+{
+    if (! variationOrigin.isValid())
+        return;
+    if (index < 0)
+        applyUndoable (variationOrigin, "Back to original");
+    else if (index < numVariations)
+        applyUndoable (variations[index], "Variation " + juce::String (index + 1));
     sendChangeMessage();
 }
 

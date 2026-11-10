@@ -583,7 +583,7 @@ void ModSourceChip::paint (juce::Graphics& g)
 
     // Live value along the bottom edge.
     const auto meter = bounds.reduced (5.0f, 0.0f).removeFromBottom (2.0f).translated (0.0f, -1.0f);
-    const bool unipolar = source >= srcEnv;
+    const bool unipolar = modSourceIsUnipolar (source);
     const float origin = unipolar ? meter.getX() : meter.getCentreX();
     const float extent = shownValue * (unipolar ? meter.getWidth() : meter.getWidth() * 0.5f);
     g.setColour (colour.withAlpha (0.9f));

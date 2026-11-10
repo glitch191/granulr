@@ -16,8 +16,8 @@ class MainPanel final : public juce::Component,
                         private juce::ChangeListener
 {
 public:
-    static constexpr int defaultWidth = 1180, defaultHeight = 740;
-    static constexpr int minWidth = 1100, minHeight = 520;
+    static constexpr int defaultWidth = 1180, defaultHeight = 770;
+    static constexpr int minWidth = 1100, minHeight = 590;
     static constexpr int maxWidth = 2400, maxHeight = 1600;
 
     MainPanel (UiContext& context, VisualEngine& engine);
@@ -55,6 +55,7 @@ private:
     void layoutOutput();
     void layoutPitch();
     void layoutTrigger();
+    void layoutCloudRow();
     void layoutEffects();
     void layoutModulation();
     void showRandomMenu();
@@ -87,7 +88,8 @@ private:
 
     // Sections
     Section grainsSection { "Grains" }, outputSection { "Output" }, pitchSection { "Pitch" },
-        triggerSection { "Trigger" }, effectsSection { "Effects" }, modSection { "Modulation" };
+        triggerSection { "Trigger" }, cloudSection { "Cloud" }, bufferSection { "Buffer" },
+        resonatorSection { "Resonator" }, effectsSection { "Effects" }, modSection { "Modulation" };
 
     juce::OwnedArray<Knob> knobs;
     juce::OwnedArray<ParamChoice> choices;
@@ -115,6 +117,14 @@ private:
     juce::Label *rateCaption = nullptr, *stepCaption = nullptr;
     Knob* lengthKnob = nullptr;
     StepGrid stepGrid;
+    juce::Array<Knob*> onsetKnobs;
+    juce::Label* onsetHint = nullptr;
+
+    // Cloud, buffer, resonator
+    juce::Array<Knob*> cloudKnobs, bufferKnobs, resKnobs;
+    juce::Label* bufferHint = nullptr;
+    ParamButton* resOn = nullptr;
+    ParamChoice* resPlace = nullptr;
 
     // Effects
     ParamButton *filterOn = nullptr, *satOn = nullptr, *diffOn = nullptr;

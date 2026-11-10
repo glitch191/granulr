@@ -56,6 +56,9 @@ public:
     void drawGrains (Canvas& canvas, juce::Rectangle<float> area);
     void drawOutput (Canvas& canvas, juce::Rectangle<float> area, int mode);
 
+    /** Gesture drawn over the buffer view. Called on the message thread. */
+    void setGestureOverlay (const GestureData& data, bool recording);
+
     /** True while something is moving and frames are worth drawing. */
     bool isActive() const noexcept { return active.load (std::memory_order_relaxed); }
 
@@ -96,6 +99,10 @@ private:
     double idleSeconds = 0.0;
 
     std::vector<juce::Point<float>> scratch;
+
+    juce::SpinLock overlayLock;
+    GestureData overlay;
+    bool overlayRecording = false;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -200,6 +207,11 @@ public:
 
     void paint (juce::Graphics&) override;
     void mouseDown (const juce::MouseEvent&) override;
+    void mouseDrag (const juce::MouseEvent&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+
+    /** Called once per display frame on the message thread. */
+    void refresh();
 
     void setMode (int newMode);
     int getMode() const noexcept { return mode; }
@@ -215,6 +227,24 @@ private:
     Kind kind;
     int mode = visSpectrum;
     bool software = false;
+
+    // Buffer view interaction
+    enum DragMode { dragNone, dragPoint, dragRegion, dragRecord };
+    struct GesturePoint { double seconds; float x, y; };
+    juce::Rectangle<int> recButtonArea() const;
+    void applyPointDrag (const juce::MouseEvent&);
+    void applyRegionDrag (const juce::MouseEvent&);
+    void addGesturePoint (const juce::MouseEvent&);
+    GestureData buildGesture() const;
+    void endParamGestures();
+
+    juce::RangedAudioParameter *positionParam = nullptr, *pitchParam = nullptr, *sprayParam = nullptr;
+    DragMode dragMode = dragNone;
+    bool recArmed = false, positionGesture = false, pitchGesture = false, sprayGesture = false;
+    int regionAnchorX = 0;
+    double recordStart = 0.0;
+    std::vector<GesturePoint> recorded;
+    uint32_t shownGestureVersion = 0xffffffffu;
 };
 
 } // namespace grn

@@ -59,6 +59,25 @@ public:
     /** Randomises the unlocked groups. amount 0..1 sets how far values may move. */
     void randomise (float amount, const std::array<bool, numParamGroups>& locked);
 
+    /** A variation close to a sound state: small moves of the unlocked groups, same routings. */
+    juce::ValueTree mutatedState (const juce::ValueTree& soundState, float amount,
+                                  const std::array<bool, numParamGroups>& locked);
+    /** A child of two sound states: each group mostly follows one parent, with some blending. */
+    juce::ValueTree crossedState (const juce::ValueTree& parentA, const juce::ValueTree& parentB);
+
+    /** Applies a variation of the current sound (undoable). */
+    void mutate (float amount, const std::array<bool, numParamGroups>& locked);
+    /** Crosses slots A and B into the active slot (undoable). False when a slot is empty. */
+    bool breed();
+    bool canBreed() const { return slots[0].isValid() || slots[1].isValid(); }
+
+    /** Six variations of the current sound to audition one after the other. */
+    static constexpr int numVariations = 6;
+    void makeVariations (float amount, const std::array<bool, numParamGroups>& locked);
+    bool hasVariations() const { return variationOrigin.isValid(); }
+    /** index 0..5 loads a variation, -1 goes back to the sound they were made from. */
+    void loadVariation (int index);
+
     /** Applies a sound state as one undoable action. */
     void applyUndoable (const juce::ValueTree& soundState, const juce::String& actionName);
 
@@ -77,6 +96,7 @@ private:
     int activeSlot = 0;
     float morph = 0.0f;
     juce::Random random;
+    juce::ValueTree variationOrigin, variations[numVariations];
 };
 
 } // namespace grn
