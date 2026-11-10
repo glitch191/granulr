@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Slow Erosion" category="Living" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="wear" value="70"/>
+    <PARAM id="size" value="700"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="spray" value="900"/>
+    <PARAM id="position" value="900"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="80"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="wear" depth="-0.7"/>
+    <SLOT source="8" dest="diffMix" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

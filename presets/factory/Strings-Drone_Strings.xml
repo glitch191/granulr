@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Drone Strings" category="Strings" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-4"/>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resMix" value="45"/>
+    <PARAM id="resDecay" value="85"/>
+    <PARAM id="resDamp" value="45"/>
+    <PARAM id="resOctave" value="-1"/>
+    <PARAM id="scale" value="10"/>
+    <PARAM id="size" value="1200"/>
+    <PARAM id="density" value="8"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="feedback" value="40"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="40"/>
+    <PARAM id="diffDecay" value="80"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="14" dest="resMix" depth="0.2"/>
+    <SLOT source="7" dest="feedback" depth="0.2"/>
+    <SLOT source="8" dest="resDecay" depth="0.15"/>
+  </MATRIX>
+</GranulrPreset>

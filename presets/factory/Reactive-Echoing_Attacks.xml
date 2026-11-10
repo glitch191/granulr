@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Echoing Attacks" category="Reactive" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="triggerMode" value="3"/>
+    <PARAM id="onsetBurst" value="6"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="position" value="120"/>
+    <PARAM id="size" value="140"/>
+    <PARAM id="spray" value="40"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="feedback" value="20"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="30"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="13" dest="pitchRandom" depth="0.2"/>
+    <SLOT source="7" dest="density" depth="0.3"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

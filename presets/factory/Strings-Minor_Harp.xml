@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Minor Harp" category="Strings" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resMix" value="70"/>
+    <PARAM id="resDecay" value="65"/>
+    <PARAM id="resDamp" value="25"/>
+    <PARAM id="resOctave" value="1"/>
+    <PARAM id="scale" value="3"/>
+    <PARAM id="root" value="9"/>
+    <PARAM id="triggerMode" value="3"/>
+    <PARAM id="onsetBurst" value="5"/>
+    <PARAM id="density" value="14"/>
+    <PARAM id="position" value="60"/>
+    <PARAM id="size" value="60"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="pitchRandom" value="12"/>
+    <PARAM id="panSpread" value="90"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="13" dest="resDecay" depth="0.2"/>
+    <SLOT source="7" dest="resMix" depth="-0.5"/>
+    <SLOT source="8" dest="pitchRandom" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

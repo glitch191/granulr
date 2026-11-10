@@ -5,14 +5,16 @@
 # preset "Name" "Category" "paramId=value ..." "source:destParamId:depth ..."
 # Only parameters that differ from their default are listed. Values use the parameter's
 # own unit (ms, %, st, Hz, dB). Choices are indices, switches are 0 or 1.
-# Sources: 0-3 LFO 1-4, 4-5 Random 1-2, 6 Envelope, 7-10 Macro 1-4.
+# Sources: 0-3 LFO 1-4, 4-5 Random 1-2, 6 Envelope, 7-10 Macro 1-4, 11 Pitch, 12 Brightness,
+# 13 Onset, 14 Drift, 15 Chaos, 16 Bounce, 17 Gesture X, 18 Gesture Y.
+# Optional fifth argument, a recorded gesture: "seconds;x values;y values" (values from -1 to 1).
 set -euo pipefail
 out="$(cd "$(dirname "$0")/.." && pwd)/presets/factory"
 mkdir -p "$out"
 rm -f "$out"/*.xml
 
 preset() {
-  local name="$1" category="$2" params="$3" routes="${4:-}"
+  local name="$1" category="$2" params="$3" routes="${4:-}" gesture="${5:-}"
   local file="$out/$(echo "$category-$name" | tr ' ' '_' | tr -cd 'A-Za-z0-9_-').xml"
   {
     printf '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -26,7 +28,12 @@ preset() {
       IFS=: read -r source dest depth <<< "$route"
       printf '    <SLOT source="%s" dest="%s" depth="%s"/>\n' "$source" "$dest" "$depth"
     done
-    printf '  </MATRIX>\n</GranulrPreset>\n'
+    printf '  </MATRIX>\n'
+    if [ -n "$gesture" ]; then
+      IFS=';' read -r seconds xs ys <<< "$gesture"
+      printf '  <GESTURE seconds="%s" x="%s" y="%s"/>\n' "$seconds" "$xs" "$ys"
+    fi
+    printf '</GranulrPreset>\n'
   } > "$file"
 }
 
@@ -465,5 +472,98 @@ preset "Octave Stack" "Drones" \
 preset "Singing Bowl" "Drones" \
   "outputGain=-6 mix=80 size=900 density=10 position=200 spray=150 feedback=58 pitchRandom=0.04 panSpread=70 filterOn=1 filterPlace=0 filterType=2 filterCutoff=900 filterReso=40 diffOn=1 diffPlace=0 diffMix=45 diffDecay=85 lfo1Rate=0.07" \
   "0:filterCutoff:0.1 7:filterReso:0.3 8:feedback:0.15"
+
+# ---------------------------------------------------------------------------------------------
+# Reactive: the playing drives the texture (Onset trigger, Pitch, Brightness and Onset sources)
+
+preset "Echoing Attacks" "Reactive" \
+  "mix=50 triggerMode=3 onsetBurst=6 density=12 position=120 size=140 spray=40 panSpread=80 windowShape=3 feedback=20 diffOn=1 diffMix=30" \
+  "13:pitchRandom:0.2 7:density:0.3 8:feedback:0.4"
+
+preset "Follow The Player" "Reactive" \
+  "mix=50 size=220 density=24 spray=300 position=300 panSpread=85 diffOn=1 diffMix=40" \
+  "11:position:0.25 12:size:-0.3 6:density:0.3 7:spray:0.3 8:diffMix:0.3"
+
+preset "Bright Opens Up" "Reactive" \
+  "mix=55 size=160 density=30 position=200 spray=200 filterOn=1 filterCutoff=1200 filterReso=30 octaveUp=10" \
+  "12:filterCutoff:0.5 12:octaveUp:0.5 13:panSpread:0.4 7:filterCutoff:0.3 8:feedback:0.4"
+
+preset "Struck Shards" "Reactive" \
+  "mix=55 triggerMode=3 onsetBurst=10 density=40 jitter=60 position=40 size=45 spray=120 pitchRandom=12 scale=5 windowShape=3 panSpread=100 octaveUp=25" \
+  "13:pitchRandom:0.3 7:spray:0.4 8:octaveUp:0.4"
+
+preset "Bouncing Replies" "Reactive" \
+  "mix=50 triggerMode=1 densityDiv=8 size=120 position=250 spray=0 windowShape=3 panSpread=60 bounceRate=1.5 bounceDamp=35 feedback=30" \
+  "16:position:0.3 16:pitch:0.15 7:feedback:0.4 8:size:0.3"
+
+preset "Pitch Painter" "Reactive" \
+  "mix=50 size=300 density=18 position=400 spray=500 scale=3 root=9 pitchRandom=5 panSpread=90 diffOn=1 diffMix=45 diffDecay=70" \
+  "11:pitch:0.25 11:panSpread:-0.3 13:size:0.3 7:pitchRandom:0.3 8:diffMix:0.3"
+
+# ---------------------------------------------------------------------------------------------
+# Swarm: grains that move together and in space (Flock, Distance, Orbit, Doppler, Drift, Chaos)
+
+preset "Murmuration" "Swarm" \
+  "mix=60 flock=85 size=180 density=40 spray=1800 position=1500 pitchRandom=7 panSpread=100 scale=4 diffOn=1 diffMix=35" \
+  "14:flock:0.15 7:flock:-0.6 8:spray:0.3"
+
+preset "Passing By" "Swarm" \
+  "mix=55 distance=70 orbit=100 doppler=80 size=600 density=10 spray=600 position=500 panSpread=100 diffOn=1 diffMix=40 diffDecay=65" \
+  "14:distance:0.3 7:doppler:-0.6 8:orbit:-0.5"
+
+preset "Deep Field" "Swarm" \
+  "mix=60 distance=100 orbit=40 flock=30 size=350 density=45 spray=1200 position=900 panSpread=100 octaveUp=15 diffOn=1 diffMix=50 diffDecay=80" \
+  "15:distance:-0.3 7:distance:-0.6 8:diffMix:0.3"
+
+preset "Lorenz Drift" "Swarm" \
+  "mix=55 size=250 density=22 position=800 spray=150 panSpread=70 chaosRate=0.25 driftRate=0.15 feedback=30 filterOn=1 filterCutoff=3000 diffOn=1 diffMix=35" \
+  "15:position:0.25 15:panSpread:0.3 14:size:0.3 14:filterCutoff:0.3 7:feedback:0.4 8:spray:0.4"
+
+preset "Shoal" "Swarm" \
+  "mix=60 flock=95 triggerMode=1 densityDiv=3 size=90 spray=2000 position=1000 pitchRandom=12 scale=5 windowShape=3 panSpread=100 distance=40 orbit=60" \
+  "7:flock:-0.5 8:pitchRandom:0.3"
+
+# ---------------------------------------------------------------------------------------------
+# Living: frozen buffers that keep changing (Evolve, Wear). These presets switch Freeze on.
+
+preset "Slow Erosion" "Living" \
+  "mix=85 freeze=1 wear=70 size=700 density=12 spray=900 position=900 panSpread=85 diffOn=1 diffMix=45 diffDecay=80" \
+  "7:wear:-0.7 8:diffMix:0.4"
+
+preset "Self Portrait" "Living" \
+  "mix=85 freeze=1 evolve=80 size=400 density=20 spray=1200 position=1000 pitchRandom=0.2 panSpread=90 reverse=30 diffOn=1 diffMix=35" \
+  "17:position:-0.4 18:pitch:0.2 7:evolve:-0.8 8:reverse:0.5" \
+  "8;0.000 0.133 0.264 0.390 0.510 0.620 0.719 0.805 0.877 0.933 0.973 0.995 0.999 0.986 0.955 0.907 0.843 0.764 0.671 0.566 0.451 0.328 0.199 0.067 -0.067 -0.199 -0.328 -0.451 -0.566 -0.671 -0.764 -0.843 -0.907 -0.955 -0.986 -0.999 -0.995 -0.973 -0.933 -0.877 -0.805 -0.719 -0.620 -0.510 -0.390 -0.264 -0.133 -0.000;0.000 0.211 0.408 0.575 0.702 0.778 0.800 0.764 0.674 0.537 0.361 0.159 -0.053 -0.262 -0.453 -0.611 -0.726 -0.789 -0.796 -0.747 -0.644 -0.496 -0.312 -0.107 0.107 0.312 0.496 0.644 0.747 0.796 0.789 0.726 0.611 0.453 0.262 0.053 -0.159 -0.361 -0.537 -0.674 -0.764 -0.800 -0.778 -0.702 -0.575 -0.408 -0.211 -0.000"
+
+preset "Climbing Memory" "Living" \
+  "mix=85 freeze=1 evolve=70 wear=20 pitch=7 size=500 density=14 spray=1000 position=1200 scale=4 panSpread=85 diffOn=1 diffMix=45 diffDecay=78" \
+  "7:evolve:-0.7 8:wear:0.5"
+
+preset "Compost" "Living" \
+  "mix=85 freeze=1 evolve=100 wear=45 size=120 density=50 spray=2000 position=2000 reverse=50 flock=40 panSpread=100 satOn=1 satDrive=6 filterOn=1 filterCutoff=5000" \
+  "15:position:0.2 7:evolve:-0.8 8:wear:0.5"
+
+# ---------------------------------------------------------------------------------------------
+# Strings: the resonator tuned to the scale of the Pitch section
+
+preset "Sympathetic Strings" "Strings" \
+  "mix=55 resOn=1 resMix=55 resDecay=75 resDamp=35 scale=2 size=200 density=24 spray=300 position=250 panSpread=80" \
+  "7:resMix:0.4 8:resDecay:0.25 6:resMix:0.2"
+
+preset "Minor Harp" "Strings" \
+  "mix=55 resOn=1 resMix=70 resDecay=65 resDamp=25 resOctave=1 scale=3 root=9 triggerMode=3 onsetBurst=5 density=14 position=60 size=60 windowShape=3 pitchRandom=12 panSpread=90" \
+  "13:resDecay:0.2 7:resMix:-0.5 8:pitchRandom:0.3"
+
+preset "Drone Strings" "Strings" \
+  "outputGain=-4 mix=80 resOn=1 resMix=45 resDecay=85 resDamp=45 resOctave=-1 scale=10 size=1200 density=8 position=300 spray=300 feedback=40 panSpread=70 diffOn=1 diffMix=40 diffDecay=80" \
+  "14:resMix:0.2 7:feedback:0.2 8:resDecay:0.15"
+
+preset "Pentatonic Zither" "Strings" \
+  "mix=55 resOn=1 resMix=60 resDecay=55 resDamp=20 resOctave=1 scale=4 root=2 triggerMode=1 densityDiv=6 size=40 position=200 spray=600 windowShape=3 panSpread=100 distance=50" \
+  "7:resDecay:0.3 8:spray:0.3"
+
+preset "Glass Resonance" "Strings" \
+  "mix=50 resOn=1 resMix=65 resDecay=70 resDamp=10 resOctave=2 scale=8 size=30 density=60 spray=800 position=400 jitter=100 panSpread=100 filterOn=1 filterType=1 filterCutoff=600 diffOn=1 diffMix=35" \
+  "12:resMix:0.3 7:resDecay:0.25 8:density:0.3"
 
 echo "Wrote $(ls "$out"/*.xml | wc -l) presets to $out"

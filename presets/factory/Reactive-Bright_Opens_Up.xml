@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Bright Opens Up" category="Reactive" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="size" value="160"/>
+    <PARAM id="density" value="30"/>
+    <PARAM id="position" value="200"/>
+    <PARAM id="spray" value="200"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="1200"/>
+    <PARAM id="filterReso" value="30"/>
+    <PARAM id="octaveUp" value="10"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="12" dest="filterCutoff" depth="0.5"/>
+    <SLOT source="12" dest="octaveUp" depth="0.5"/>
+    <SLOT source="13" dest="panSpread" depth="0.4"/>
+    <SLOT source="7" dest="filterCutoff" depth="0.3"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

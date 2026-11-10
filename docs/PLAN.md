@@ -233,3 +233,20 @@ docs/                          PLAN.md, screenshots/
 - **File structure.** Fewer, larger files than listed in section 9 (see the README); no `cmake/` folder.
 - **Screenshots.** Taken off screen by `granulr_shot` with the software renderer, because screen capture of the standalone window was not possible in the build environment.
 - **FFT.** 4096, 8192 or 16384 points depending on the sample rate.
+
+## 15. Phase E: organic features
+
+Added after the first complete version. Every new parameter is neutral at its default, and a regression test (`tests/RegressionTests.cpp`) checks that the default sound and three presets render exactly as before.
+
+- **Listening.** `src/dsp/Analysis.h` detects onsets (fast against slow envelope, 60 ms refractory time) and estimates brightness from the energy of the sample-to-sample difference. New trigger mode Onset (`onsetSens`, `onsetBurst`). New sources Pitch, Brightness and Onset, computed by the engine and handed to the modulation engine one sub-block late.
+- **Motion.** New sources Drift (random walk), Chaos (Lorenz attractor) and Bounce. `flock` correlates the random draws of successive grains (position, pitch, pan) through a reflected random walk.
+- **Living buffer.** `GrainEngine::evolveBuffer`: while frozen, a rewrite head loops through the 12 seconds the grains can reach. `evolve` blends the grain cloud in with equal power, matched to the level of the audio it replaces, after a DC blocker; `wear` filters and attenuates at each pass. The first version blended the raw cloud and ran away (overlapping grains add up coherently at very low frequencies), hence the level matching.
+- **Space.** `distance`, `orbit` and `doppler` give each grain a depth (level and one-pole low-pass), a pan travel and a pitch glide. A second instantiation of the render loop handles them, so grains without space cost what they did. These draws use their own random generator: the main sequence is unchanged.
+- **Resonator.** `Resonator` in `src/dsp/Effects.h`: six damped combs (four in Eco) tuned to the scale and root, each with a soft saturation. The input gain sits between constant noise level and constant peak level, because a note sitting exactly on a string would otherwise be boosted by tens of decibels.
+- **Buffer view.** Drag sets Position and Pitch, Alt + drag sets Position and Spray, Rec records a gesture replayed by the audio thread as the sources Gesture X and Gesture Y (`GestureData`, 512 points at most, saved in the state and in presets as a `GESTURE` node).
+- **Variations.** `PresetManager::mutatedState`, `crossedState`, `makeVariations`. They are reached from the menu next to Randomize; the row of six buttons planned at first was replaced by menu entries to keep the header as it is.
+- **Grain limit.** Now `quality limit x min (1, 72000 / sample rate)` instead of a halving above 100 kHz (this replaces the rule in section 14). With every new feature on, the worst case rose with the sample rate and its 99th percentile passed 20 % at 96 and 192 kHz; the proportional limit brings it back under.
+- **Layout.** New row Cloud, Buffer, Resonator. Default size 1180 x 770, minimum 1100 x 590. Source chips in three columns.
+- **State.** `stateVersion` 2. A version 1 state loads without migration. `triggerMode` gained a fourth choice, which changes its normalised values; acceptable because no version had been published.
+- **Presets.** 20 presets in four new categories (Reactive, Swarm, Living, Strings): 120 in total.
+- **Not done.** The gesture is not part of undo history. The row of six variation buttons (see above).

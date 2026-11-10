@@ -13,20 +13,23 @@ The screenshots are produced off screen by `granulr_shot` (software renderer, sy
 ## What it does
 
 - **Live buffer with freeze.** 8 seconds of stereo audio are always available. Freeze stops recording and lets the grains play the held material for as long as you want.
-- **Grains.** Position, size, density, spray, jitter, reverse chance, scan, window shape and skew, pan spread and width. Up to 64, 128 or 256 grains depending on the quality setting (halved above 100 kHz).
-- **Three trigger modes.** Free (density in grains per second), Sync (note divisions of the host tempo) and Pattern (16 steps with gate, chance and ratchets).
+- **Grains.** Position, size, density, spray, jitter, reverse chance, scan, window shape and skew, pan spread and width. Up to 64, 128 or 256 grains depending on the quality setting (the limit shrinks in proportion to the sample rate above 72 kHz).
+- **Four trigger modes.** Free (density in grains per second), Sync (note divisions of the host tempo), Pattern (16 steps with gate, chance and ratchets) and Onset (each attack of the input starts a burst of grains).
+- **Cloud behaviour.** Flock makes each grain follow the previous one in position, pitch and pan. Distance, Orbit and Doppler give each grain a depth, a movement across the stereo field and a pitch glide.
+- **Living buffer.** While the buffer is frozen, Evolve writes the grain cloud back into it and Wear erodes it at each pass, so a held sound keeps changing instead of looping.
 - **Pitch on a scale.** Transposition, random pitch, four harmony voices, octave jumps, and quantisation to a scale (chromatic, major, minor, pentatonics, dorian, phrygian, whole tone, octaves, fifths and octaves, or a custom 12-note mask).
 - **Effects.** Filter, saturation and diffusion, each placed either inside the feedback loop or after it. Feedback, ducking against the dry input, and a safety limiter.
-- **Modulation.** Four LFOs, two random sources, an envelope follower and four macros, routed through a 32-slot matrix to 41 destinations. Drag a source chip onto a knob to create a route.
-- **Presets.** Factory bank, user presets, favourites, A/B slots with morph, undoable randomisation with group locks.
-- **Visualisers.** Grain view over the buffer, plus spectrum, spectrogram, oscilloscope and vectorscope of the output.
+- **Resonator.** Six strings tuned to the scale and root of the Pitch section, excited by the grains.
+- **Modulation.** Four LFOs, two random sources, an envelope follower, four macros, three sources that listen to the input (Pitch, Brightness, Onset), three that move on their own (Drift, Chaos, Bounce) and a recorded XY gesture, routed through a 32-slot matrix to 49 destinations. Drag a source chip onto a knob to create a route.
+- **Presets.** Factory bank, user presets, favourites, A/B slots with morph, undoable randomisation with group locks, and variations that stay close to the current sound (Mutate, Breed A x B, six variations to try).
+- **Visualisers.** Grain view over the buffer (you can drag in it), plus spectrum, spectrogram, oscilloscope and vectorscope of the output.
 - **Interface zoom** from 100 to 200 % (default 125 %).
 
 Stereo in, stereo out. No MIDI input, no sidechain, no added latency.
 
 ### Typical uses
 
-The factory bank holds 100 presets in 12 categories:
+The factory bank holds 120 presets in 16 categories:
 
 | Category | Presets | What to expect |
 | :- | :- | :- |
@@ -42,6 +45,10 @@ The factory bank holds 100 presets in 12 categories:
 | Ducked | 6 | Textures that step back while the source plays |
 | Smear | 8 | Blurred transients, pad-like sustain |
 | Drones | 9 | Long feedback beds from short material |
+| Reactive | 6 | The playing drives the texture: Onset trigger, Pitch, Brightness and Onset sources |
+| Swarm | 5 | Flock, Distance, Orbit, Doppler, Drift and Chaos |
+| Living | 4 | Frozen buffers that keep changing with Evolve and Wear (these presets switch Freeze on) |
+| Strings | 5 | The resonator tuned to a scale |
 
 In every preset Macro 1 and Macro 2 are routed to the controls that matter most for that sound, so turning them is the quickest way to adapt it. Presets are defined in `scripts/build-presets.sh`, which regenerates `presets/factory`.
 
@@ -96,7 +103,10 @@ Preset name (click to open the browser), previous and next, A and B slots, Copy 
 | Grains | Position and Size (free in milliseconds or synced to a note division), Density, Spray, Jitter, Reverse, Scan, Window, Skew, Pan, Width, Freeze |
 | Output | Feedback, Duck (amount, attack, release), Input, Mix, Output, Limiter |
 | Pitch | Scale, root, note strip (custom mask), Pitch, Fine, Random, Oct +, Oct -, four voices (interval and chance) |
-| Trigger | Mode, rate, step division, pattern length, step grid (click: gate, drag up or down: chance, number below: ratchets) |
+| Trigger | Mode, rate, step division, pattern length, step grid (click: gate, drag up or down: chance, number below: ratchets). In Onset mode: Sensitivity and Burst |
+| Cloud | Flock, Distance, Orbit, Doppler |
+| Buffer | Evolve, Wear (both act while Freeze is on) |
+| Resonator | On, placement, Mix, Decay, Damping, Octave |
 | Effects | Filter (type, cutoff, resonance), Saturation (type, drive), Diffusion (size, decay, damping, mix), each with its placement |
 | Modulation | Source chips, editor of the selected source, macros, matrix |
 
@@ -108,6 +118,34 @@ Scan moves the read position through the buffer over time; it is most useful whe
 - Alt + drag on a knob changes the depth of the selected source for that knob.
 - Right-click a knob for its routes, value entry and reset.
 - The coloured ring around a knob shows the modulated value in real time.
+
+### Sources that listen and sources that move
+
+| Source | What it does |
+| :- | :- |
+| Pitch | Follows the note played at the input, two octaves around middle C. Holds while there is no clear note |
+| Brightness | Follows how bright the input is |
+| Onset | Jumps to full on each attack, then falls back with the Envelope release time |
+| Drift | Random walk. Pull brings it back to the centre |
+| Chaos | Lorenz attractor: never repeats, switches sides without warning. Shape makes it roll instead |
+| Bounce | A ball dropped again when it rests or on an attack |
+| Gesture X, Gesture Y | A movement you drew in the buffer view, replayed in a loop |
+
+### Buffer view
+
+- Drag in the view to set Position (across) and Pitch (up and down). Hold Shift to leave the pitch alone.
+- Alt + drag draws the range the grains read: it sets Position and Spray.
+- Rec arms the recording: the next drag is recorded, then replayed in a loop as the Gesture sources. Routes from Gesture X to Position and from Gesture Y to Pitch are created if they do not exist. Right-click Rec to erase the gesture.
+- The gesture is saved with the project and with presets, and plays with the editor closed. Its playback speed is the Gesture Rate parameter, available to the host.
+- With Distance above zero, far grains are drawn smaller and fainter.
+
+### Variations
+
+The menu next to Randomize holds three ways to get new sounds close to the current one. They use the amount and the locked groups of that menu, and each one is a single undo step.
+
+- **Mutate:** small moves of every unlocked control; routings keep their destinations.
+- **Breed A x B:** crosses slots A and B. Each group (grains, pitch, effects, modulation) mostly follows one parent.
+- **Make 6 variations:** prepares six mutations to try one after the other, and Back to original.
 
 ### Scale quantisation
 
@@ -132,7 +170,7 @@ Some hosts keep keyboard shortcuts for themselves; every action is also availabl
 
 The zoom chosen last becomes the default for new instances.
 
-Changes to the modulation matrix made by hand are not part of undo history; preset loads and randomisation are.
+Changes to the modulation matrix made by hand and gesture recordings are not part of undo history; preset loads, randomisation and variations are (undo does not bring a replaced gesture back).
 
 ### Where files are stored
 
@@ -149,10 +187,12 @@ Measured with `granulr_bench` on a Ryzen 7 9800X3D, one core, as processing time
 
 | Case | 48 kHz | 96 kHz | 192 kHz |
 | :- | :- | :- | :- |
-| Default settings, mean | 0.30 % | 0.40 % | 0.65 % |
-| Worst case (High quality, maximum density, every effect on), mean | about 6 % | about 11 % | about 11.5 % |
+| Default settings, mean | 0.32 % | 0.43 % | 0.72 % |
+| Worst case (High quality, maximum density, every effect and every cloud feature on), mean | 8.4 % | 12.6 % | 13.9 % |
+| Worst case, 99th percentile | 12.0 % | 18.1 % | 19.9 % |
+| Worst case with a frozen, evolving buffer, mean | 7.8 % | 11.9 % | 13.4 % |
 
-Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 100 factory presets stays under 1.4 % mean (2.1 % at the 99th percentile) at 96 kHz. Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
+Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 120 factory presets stays under 1.8 % mean (2.9 % at the 99th percentile) at 96 kHz. The one case measured above 20 % at the 99th percentile is the worst case at 192 kHz with blocks of 32 samples (20.7 %). Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
 
 When the input and the grain tail are silent the engine goes idle. With the editor closed, no analysis is done for the visualisers.
 

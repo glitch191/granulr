@@ -55,6 +55,24 @@ void configureWorstCase (GranulrProcessor& processor)
     setParam (processor, pid::diffPlace, static_cast<float> (placeFeedback));
     setParam (processor, pid::diffDecay, 80.0f);
 
+    // Everything added after the first version: flock, space per grain, resonator, gesture.
+    setParam (processor, pid::flock, 50.0f);
+    setParam (processor, pid::distance, 100.0f);
+    setParam (processor, pid::orbit, 100.0f);
+    setParam (processor, pid::doppler, 100.0f);
+    setParam (processor, pid::resOn, 1.0f);
+    setParam (processor, pid::resPlace, static_cast<float> (placeFeedback));
+    setParam (processor, pid::resDecay, 80.0f);
+    GestureData gesture;
+    gesture.count = 64;
+    gesture.seconds = 2.0f;
+    for (int i = 0; i < gesture.count; ++i)
+    {
+        gesture.x[static_cast<size_t> (i)] = std::sin (0.1f * static_cast<float> (i));
+        gesture.y[static_cast<size_t> (i)] = std::cos (0.23f * static_cast<float> (i));
+    }
+    processor.setGesture (gesture);
+
     // A full modulation matrix.
     auto& matrix = processor.getMatrix();
     for (int slot = 0; slot < numModSlots; ++slot)
@@ -86,10 +104,13 @@ struct Result
     double mean = 0.0, p99 = 0.0, worst = 0.0;
 };
 
-Result measure (GranulrProcessor& processor, double sampleRate, int blockSize, double seconds)
+Result measure (GranulrProcessor& processor, double sampleRate, int blockSize, double seconds, bool prepare = true)
 {
-    processor.setPlayConfigDetails (2, 2, sampleRate, blockSize);
-    processor.prepareToPlay (sampleRate, blockSize);
+    if (prepare)
+    {
+        processor.setPlayConfigDetails (2, 2, sampleRate, blockSize);
+        processor.prepareToPlay (sampleRate, blockSize);
+    }
 
     juce::AudioBuffer<float> buffer (2, blockSize);
     juce::MidiBuffer midi;
@@ -152,13 +173,13 @@ int main (int argc, char** argv)
 
     std::printf ("granulr benchmark, %s, %.0f s of audio per case\n", GRANULR_VERSION_STRING, seconds);
     std::printf ("CPU: %s, %d logical cores\n\n", juce::SystemStats::getCpuModel().toRawUTF8(), juce::SystemStats::getNumCpus());
-    std::printf ("%-28s %8s %7s %9s %9s %9s\n", "case", "rate", "block", "mean %", "p99 %", "worst %");
+    std::printf ("%-30s %8s %7s %9s %9s %9s\n", "case", "rate", "block", "mean %", "p99 %", "worst %");
 
     bool failed = false;
     auto report = [&] (const char* name, double rate, int block, const Result& r, double ceiling)
     {
         const bool over = ceiling > 0.0 && r.mean > ceiling;
-        std::printf ("%-28s %8.0f %7d %9.2f %9.2f %9.2f%s\n", name, rate, block, r.mean, r.p99, r.worst,
+        std::printf ("%-30s %8.0f %7d %9.2f %9.2f %9.2f%s\n", name, rate, block, r.mean, r.p99, r.worst,
                      over ? "   OVER BUDGET" : "");
         if (over)
             failed = true;
@@ -180,6 +201,28 @@ int main (int argc, char** argv)
             const bool reference = rate == 48000.0 && block == 128;
             report ("worst case", rate, block, measure (processor, rate, block, seconds), reference ? 20.0 : 0.0);
         }
+
+    for (double rate : quick ? std::vector<double> { 48000.0 } : std::vector<double> { 48000.0, 96000.0, 192000.0 })
+    {
+        // Frozen buffer with the living buffer rewriting it, on top of the worst case.
+        GranulrProcessor processor;
+        configureWorstCase (processor);
+        setParam (processor, pid::evolve, 100.0f);
+        setParam (processor, pid::wear, 50.0f);
+        processor.setPlayConfigDetails (2, 2, rate, 128);
+        processor.prepareToPlay (rate, 128);
+        juce::AudioBuffer<float> buffer (2, 128);
+        juce::MidiBuffer midi;
+        juce::Random random (3);
+        int64_t position = 0;
+        for (int block = 0; block < static_cast<int> (9.0 * rate / 128.0); ++block, position += 128)
+        {
+            fillInput (buffer, 128, position, rate, random);
+            processor.processBlock (buffer, midi);
+        }
+        setParam (processor, pid::freeze, 1.0f);
+        report ("worst case, frozen evolving", rate, 128, measure (processor, rate, 128, seconds, false), rate == 48000.0 ? 20.0 : 0.0);
+    }
 
     {
         GranulrProcessor processor;

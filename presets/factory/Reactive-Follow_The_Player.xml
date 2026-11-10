@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Follow The Player" category="Reactive" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="size" value="220"/>
+    <PARAM id="density" value="24"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="40"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="11" dest="position" depth="0.25"/>
+    <SLOT source="12" dest="size" depth="-0.3"/>
+    <SLOT source="6" dest="density" depth="0.3"/>
+    <SLOT source="7" dest="spray" depth="0.3"/>
+    <SLOT source="8" dest="diffMix" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

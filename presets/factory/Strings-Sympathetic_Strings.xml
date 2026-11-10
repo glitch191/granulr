@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Sympathetic Strings" category="Strings" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resMix" value="55"/>
+    <PARAM id="resDecay" value="75"/>
+    <PARAM id="resDamp" value="35"/>
+    <PARAM id="scale" value="2"/>
+    <PARAM id="size" value="200"/>
+    <PARAM id="density" value="24"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="position" value="250"/>
+    <PARAM id="panSpread" value="80"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="resMix" depth="0.4"/>
+    <SLOT source="8" dest="resDecay" depth="0.25"/>
+    <SLOT source="6" dest="resMix" depth="0.2"/>
+  </MATRIX>
+</GranulrPreset>

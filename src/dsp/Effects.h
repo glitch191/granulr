@@ -218,7 +218,12 @@ public:
             frequency[l] = hz;
             targetDelay[l] = std::clamp (fs / hz - filterDelay, 2.0f, static_cast<float> (lineLength - 4));
             feedback[l] = std::pow (10.0f, -3.0f / (hz * t60));
-            inputGain[l] = std::sqrt (std::max (0.0f, 1.0f - feedback[l] * feedback[l]));
+            // Between a constant level for noise (sqrt (1 - g^2)) and a constant peak for a note
+            // that sits exactly on the string (1 - g): long decays would otherwise explode on
+            // tuned material, which is exactly what this effect is fed with.
+            const float noiseGain = std::sqrt (std::max (0.0f, 1.0f - feedback[l] * feedback[l]));
+            const float peakGain = 3.0f * (1.0f - feedback[l]);
+            inputGain[l] = std::sqrt (noiseGain * peakGain);
             const float pan = activeLines > 1 ? static_cast<float> (l) / static_cast<float> (activeLines - 1) : 0.5f;
             const float angle = (0.2f + 0.6f * ((l & 1) ? 1.0f - pan : pan)) * 0.5f * kPi;
             panL[l] = std::cos (angle);
@@ -247,7 +252,8 @@ public:
                 const float tap = line[static_cast<size_t> (i0)]
                                   + frac * (line[static_cast<size_t> (i1)] - line[static_cast<size_t> (i0)]);
                 dampState[l] += dampCoef * (tap - dampState[l]);
-                const float y = input * inputGain[l] + feedback[l] * dampState[l];
+                // Each string saturates softly at half scale, so a sustained note cannot run away.
+                const float y = 0.5f * softClip (2.0f * (input * inputGain[l] + feedback[l] * dampState[l]));
                 line[static_cast<size_t> (writeIndex)] = y;
                 outL += y * panL[l];
                 outR += y * panR[l];

@@ -1,45 +1,170 @@
-granulr benchmark, 0.1.0, 8 s of audio per case
+granulr benchmark, 0.1.0, 10 s of audio per case
 CPU: AMD Ryzen 7 9800X3D 8-Core Processor, 16 logical cores
 
-case                             rate   block    mean %     p99 %   worst %
-default                         44100      32      0.29      0.62      1.49
-default                         44100      64      0.28      0.54      0.80
-default                         44100     128      0.28      0.52      0.86
-default                         44100     256      0.28      0.49      0.57
-default                         44100    1024      0.27      0.29      0.29
-default                         48000      32      0.32      0.69      1.36
-default                         48000      64      0.31      0.58      0.90
-default                         48000     128      0.30      0.56      0.74
-default                         48000     256      0.30      0.53      0.63
-default                         48000    1024      0.30      0.35      0.44
-default                         96000      32      0.44      1.20      6.63
-default                         96000      64      0.41      0.75      1.57
-default                         96000     128      0.40      0.65      1.08
-default                         96000     256      0.40      0.65      1.11
-default                         96000    1024      0.39      0.57      0.68
-default                        192000      32      0.71      1.08      5.22
-default                        192000      64      0.67      1.02      5.34
-default                        192000     128      0.65      0.97      1.86
-default                        192000     256      0.64      0.96      1.26
-default                        192000    1024      0.64      0.90      0.98
-worst case                      44100      32      4.96      5.54      7.54
-worst case                      44100      64      4.95      5.37      8.47
-worst case                      44100     128      4.94      5.27      6.96
-worst case                      44100     256      5.02      7.81      8.44
-worst case                      44100    1024      5.71      7.84      7.93
-worst case                      48000      32      6.23      9.76     14.78
-worst case                      48000      64      6.21      9.67     12.74
-worst case                      48000     128      6.13      9.52     10.04
-worst case                      48000     256      6.14      9.23      9.57
-worst case                      48000    1024      5.62      8.03     11.66
-worst case                      96000      32     10.95     16.59    143.91
-worst case                      96000      64     10.69     11.91     25.70
-worst case                      96000     128     10.67     11.72     19.61
-worst case                      96000     256     10.68     11.55     16.37
-worst case                      96000    1024     10.69     11.60     14.99
-worst case                     192000      32     11.57     15.06     38.28
-worst case                     192000      64     11.54     14.31     24.81
-worst case                     192000     128     11.47     12.72     26.61
-worst case                     192000     256     11.45     12.61     17.23
-worst case                     192000    1024     11.47     12.41     18.05
-bypassed                        48000     128      0.20      0.44      0.58
+case                               rate   block    mean %     p99 %   worst %
+default                           44100      32      0.31      0.63      2.36
+default                           44100      64      0.30      0.55      2.07
+default                           44100     128      0.29      0.53      1.17
+default                           44100     256      0.29      0.50      1.02
+default                           44100    1024      0.30      0.39      0.47
+default                           48000      32      0.34      0.69      3.18
+default                           48000      64      0.33      0.60      1.74
+default                           48000     128      0.32      0.58      0.82
+default                           48000     256      0.31      0.55      0.88
+default                           48000    1024      0.31      0.36      0.39
+default                           96000      32      0.48      1.23     44.49
+default                           96000      64      0.45      0.77     18.96
+default                           96000     128      0.43      0.68      1.91
+default                           96000     256      0.43      0.67      0.86
+default                           96000    1024      0.42      0.60      0.72
+default                          192000      32      0.79      1.14      6.18
+default                          192000      64      0.75      1.08     11.79
+default                          192000     128      0.72      1.03      4.92
+default                          192000     256      0.71      1.03      2.57
+default                          192000    1024      0.70      0.96      2.55
+worst case                        44100      32      6.12      7.86     56.39
+worst case                        44100      64      6.10      7.89     16.39
+worst case                        44100     128      7.27     10.98     17.38
+worst case                        44100     256      7.71     10.84     15.31
+worst case                        44100    1024      7.71      9.63     10.90
+worst case                        48000      32      7.69     12.12     30.06
+worst case                        48000      64      8.52     12.17     95.74
+worst case                        48000     128      8.38     11.96     18.26
+worst case                        48000     256      7.67     11.50     19.83
+worst case                        48000    1024      8.32     10.44     12.58
+worst case                        96000      32     12.46     18.66     37.59
+worst case                        96000      64     12.36     18.47     31.89
+worst case                        96000     128     12.58     18.08     28.25
+worst case                        96000     256     12.30     17.84     26.73
+worst case                        96000    1024     12.59     16.68     20.65
+worst case                       192000      32     13.85     20.70     93.18
+worst case                       192000      64     13.61     20.52     39.93
+worst case                       192000     128     13.89     19.93     38.52
+worst case                       192000     256     13.36     19.47     31.91
+worst case                       192000    1024     13.99     19.27     23.59
+worst case, frozen evolving       48000     128      7.75     11.43     23.42
+worst case, frozen evolving       96000     128     11.89     17.66     27.17
+worst case, frozen evolving      192000     128     13.38     19.65     62.83
+bypassed                          48000     128      0.21      0.62      0.89
+
+120 presets at 96 kHz, 128 samples
+Dust In Light                     96000     128      0.91      1.57      3.38
+Fifths Above                      96000     128      1.22      2.00      3.50
+Glass Garden                      96000     128      1.10      1.76      9.56
+Low Fog                           96000     128      1.21      1.94      3.85
+Morning Mist                      96000     128      1.23      2.24      6.50
+Night Field                       96000     128      1.05      1.73      5.14
+Slow Clouds                       96000     128      1.24      1.95      4.94
+Soft Static                       96000     128      0.98      1.64      3.61
+Tidal Drift                       96000     128      1.10      1.81      3.46
+Wide Horizon                      96000     128      1.28      1.98      3.60
+Dorian Rain                       96000     128      0.89      1.55      3.94
+Falling Leaves                    96000     128      0.91      1.52      4.83
+Harp Run                          96000     128      0.91      1.55      3.72
+Major Steps                       96000     128      0.92      1.53      4.71
+Octave Ladder                     96000     128      0.57      1.13      5.19
+Pentatonic Stairs                 96000     128      0.93      1.57      2.47
+Phrygian Echoes                   96000     128      0.57      1.04      1.95
+Whole Tone Spiral                 96000     128      0.60      0.95      3.56
+Detuned Pair                      96000     128      0.56      1.08      2.50
+Octave Doubler                    96000     128      0.58      1.10      1.96
+Rotary Motion                     96000     128      0.61      1.15      2.23
+Slow Ensemble                     96000     128      0.60      1.14      5.33
+Thickener                         96000     128      0.59      1.12      2.22
+Vibrato Cloud                     96000     128      0.60      1.16      2.11
+Wide Unison                       96000     128      0.63      1.22      3.44
+Dotted Eighth                     96000     128      0.59      1.09      2.44
+Dub Chamber                       96000     128      1.19      1.91      4.86
+Falling Repeats                   96000     128      0.60      1.07      4.39
+Grain Echo                        96000     128      0.60      1.09      2.08
+Long Smeared Echo                 96000     128      1.08      1.93      3.77
+Reverse Echo                      96000     128      0.54      1.01      3.41
+Rising Repeats                    96000     128      0.59      1.07      2.21
+Scattered Echo                    96000     128      0.55      1.02      4.87
+Slapback Cloud                    96000     128      0.60      1.12      2.40
+Deep Bed                          96000     128      1.44      2.29      7.72
+Evolving Bed                      96000     128      1.72      2.71      5.13
+Fifth Drone                       96000     128      1.49      2.29      6.95
+Infinite Sustain                  96000     128      1.19      1.89      5.05
+Machine Hum                       96000     128      0.94      1.60      2.59
+Octave Stack                      96000     128      1.43      2.23      4.45
+Organ Pipe                        96000     128      1.14      1.84      4.82
+Short Source Drone                96000     128      1.45      2.34      5.67
+Singing Bowl                      96000     128      1.23      2.05      4.91
+Answering Cloud                   96000     128      0.99      1.74      4.52
+Behind The Voice                  96000     128      1.18      2.09      4.39
+Breathing Shimmer                 96000     128      1.09      1.95      4.85
+Pumping Echo                      96000     128      0.51      0.98      2.67
+Shadow Pad                        96000     128      1.11      1.91      4.84
+Tail Only                         96000     128      1.16      1.86      3.40
+Frozen Pulse                      96000     128      0.25      0.32      1.99
+Glacier                           96000     128      0.25      0.39      1.58
+Held Breath                       96000     128      0.24      0.38      2.64
+Ice Choir                         96000     128      0.26      0.32      2.88
+Reverse Hold                      96000     128      0.25      0.33      1.69
+Shiver                            96000     128      0.26      0.33      1.30
+Slow Scan                         96000     128      0.25      0.33      1.20
+Still Lake                        96000     128      0.26      0.32      1.29
+Suspended Chord                   96000     128      0.25      0.32     17.15
+Bit Scatter                       96000     128      0.56      1.10      2.90
+Broken Loop                       96000     128      0.53      1.01      3.14
+Half Time Jump                    96000     128      0.53      0.97      1.88
+Random Access                     96000     128      0.50      0.97      2.30
+Ratchet Ladder                    96000     128      0.48      0.95      1.98
+Sharp Edges                       96000     128      0.60      1.10      4.35
+Sixteenth Shards                  96000     128      0.74      1.33      2.20
+Stutter Gate                      96000     128      0.49      0.99      1.73
+Tape Stop Flick                   96000     128      0.53      1.00      1.75
+Triplet Chop                      96000     128      0.50      0.96      2.06
+Climbing Memory                   96000     128      0.24      0.31      1.54
+Compost                           96000     128      0.24      0.32      2.32
+Self Portrait                     96000     128      0.25      0.33      1.43
+Slow Erosion                      96000     128      0.24      0.31      1.13
+Cassette Wobble                   96000     128      0.95      1.55      4.00
+Crushed Grains                    96000     128      0.63      1.11      3.04
+Dropouts                          96000     128      0.99      2.23      3.52
+Old Vinyl                         96000     128      0.95      1.61      4.10
+Radio Band                        96000     128      0.68      1.25      3.16
+Telephone                         96000     128      0.69      1.53      4.05
+Warped Memory                     96000     128      1.16      1.95      3.71
+Worn Tape                         96000     128      0.88      1.54      4.88
+Bouncing Replies                  96000     128      0.51      1.01      2.08
+Bright Opens Up                   96000     128      0.70      1.26      3.86
+Echoing Attacks                   96000     128      0.87      1.54      2.62
+Follow The Player                 96000     128      0.88      1.54      3.51
+Pitch Painter                     96000     128      1.36      2.26      4.91
+Struck Shards                     96000     128      0.52      1.02      2.43
+Backward Swell                    96000     128      1.02      1.73      4.70
+Ghost Reply                       96000     128      0.95      1.60      4.34
+Mirror Hall                       96000     128      1.08      1.78      3.15
+Reverse Pluck                     96000     128      0.51      0.97      2.51
+Reverse Shimmer                   96000     128      1.13      2.02      3.65
+Rewind                            96000     128      0.65      1.21      2.62
+Undertow                          96000     128      1.11      1.75      4.58
+Bright Tail                       96000     128      1.09      1.73      3.46
+Choir Of Glass                    96000     128      1.24      2.02      4.96
+Crystal Rise                      96000     128      1.14      1.85      3.52
+Dark Shimmer                      96000     128      1.28      1.99      4.15
+Double Octave Air                 96000     128      1.17      1.90      3.58
+Fifth Halo                        96000     128      1.20      1.97      3.68
+Minor Halo                        96000     128      1.08      1.85      3.05
+Octave Halo                       96000     128      1.14      2.12      6.19
+Slow Bloom                        96000     128      1.06      1.83      7.59
+Attack Eraser                     96000     128      0.75      1.42      2.83
+Pad Maker                         96000     128      1.60      2.74      3.96
+Reverse Blur                      96000     128      1.28      2.17     25.07
+Soft Focus                        96000     128      0.95      1.73      3.83
+Spectral Wash                     96000     128      1.13      1.93      5.61
+Thick Air                         96000     128      1.15      1.99      3.29
+Time Blur                         96000     128      1.45      2.38     27.23
+Transient Blur                    96000     128      1.12      1.95      4.34
+Drone Strings                     96000     128      1.69      2.60      4.69
+Glass Resonance                   96000     128      1.37      2.21     20.43
+Minor Harp                        96000     128      0.91      1.45      4.09
+Pentatonic Zither                 96000     128      0.89      1.45      4.85
+Sympathetic Strings               96000     128      1.09      1.72      3.87
+Deep Field                        96000     128      1.71      2.70      6.81
+Lorenz Drift                      96000     128      1.55      2.90      5.03
+Murmuration                       96000     128      1.08      1.87      4.80
+Passing By                        96000     128      1.09      1.85      4.49
+Shoal                             96000     128      0.51      1.01      3.95

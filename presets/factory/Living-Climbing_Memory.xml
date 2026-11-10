@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Climbing Memory" category="Living" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="evolve" value="70"/>
+    <PARAM id="wear" value="20"/>
+    <PARAM id="pitch" value="7"/>
+    <PARAM id="size" value="500"/>
+    <PARAM id="density" value="14"/>
+    <PARAM id="spray" value="1000"/>
+    <PARAM id="position" value="1200"/>
+    <PARAM id="scale" value="4"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="78"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="evolve" depth="-0.7"/>
+    <SLOT source="8" dest="wear" depth="0.5"/>
+  </MATRIX>
+</GranulrPreset>

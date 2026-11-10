@@ -58,8 +58,13 @@ public:
     bool isLimiting() const noexcept { return limiter.isReducing(); }
     int getCurrentStep() const noexcept { return currentStep; }
     static int maxGrainsForQuality (int quality) noexcept;
-    /** Grain limit in use: halved above 100 kHz so the worst case stays within the CPU budget. */
-    int maxGrains (int quality) const noexcept { return fs > 100000.0 ? maxGrainsForQuality (quality) / 2 : maxGrainsForQuality (quality); }
+    /** Grain limit in use. The cost grows with grains x sample rate, so above 72 kHz the limit shrinks
+        in proportion and the worst case stays within the CPU budget at every rate. */
+    int maxGrains (int quality) const noexcept
+    {
+        const double scale = std::min (1.0, 72000.0 / fs);
+        return std::max (16, static_cast<int> (maxGrainsForQuality (quality) * scale));
+    }
 
     /** Audio thread only. Returns the number of views written. */
     int fillGrainViews (GrainView* destination, int maxViews) const noexcept;
