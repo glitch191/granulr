@@ -1,6 +1,6 @@
 # granulr: implementation plan (phase A)
 
-Status: approved plan pending. No code written yet. This document is the reference for phase B.
+Status: implemented. Sections 1 to 13 are the plan as approved before phase B; section 14 lists where the implementation differs.
 
 ## 1. Environment findings
 
@@ -218,3 +218,18 @@ docs/                          PLAN.md, screenshots/
 - The modulation matrix and A/B snapshots are plugin state, not host parameters (D8, D9).
 - "Scan" implements the "speed inside the grain" item (D10).
 - The GitHub workflow uses the default Visual Studio generator of the runner (`-A x64`, no fixed generator name), because the Visual Studio version on `windows-latest` may change.
+
+## 14. Deviations after implementation
+
+- **Scale quantisation (D11).** A pitch tracker (McLeod NSDF on a decimated copy of the input) was added, so grains land on absolute scale notes when the input has a clear pitch. Interval quantisation, as planned, is the fallback for unvoiced input.
+- **Grain pool.** Array of structures with active and free lists (320 slots) instead of structure of arrays. Read positions are 32.32 fixed point.
+- **Grain limit.** Halved above 100 kHz (Eco 32, Normal 64, High 128) so the worst case stays within the 20 % budget at 192 kHz.
+- **Window table.** 1024 points per shape; skew uses two window increments (before and after the peak) instead of phase warping.
+- **Silence detection.** The engine goes idle when the whole buffer is silent and the wet output has been silent for 0.5 s.
+- **Modulation matrix.** Stored as atomics read directly by the audio thread, instead of a swapped snapshot. Manual matrix edits are not undoable; preset loads and randomisation are.
+- **Rendering.** Swap interval 0 in every mode; pacing uses `juce::VBlankAttachment` (Display sync, Capped) or continuous repainting (Unlimited).
+- **Zoom.** Applied as a transform on the main panel, not with `setScaleFactor`.
+- **Layout.** Base size 1180 x 740, minimum 1100 x 520. Both visualisers are always side by side. The modulation panel shows one source editor at a time (the selected chip).
+- **File structure.** Fewer, larger files than listed in section 9 (see the README); no `cmake/` folder.
+- **Screenshots.** Taken off screen by `granulr_shot` with the software renderer, because screen capture of the standalone window was not possible in the build environment.
+- **FFT.** 4096, 8192 or 16384 points depending on the sample rate.
