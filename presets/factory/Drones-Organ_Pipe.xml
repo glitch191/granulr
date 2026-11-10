@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Organ Pipe" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="size" value="1000"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="position" value="250"/>
+    <PARAM id="spray" value="100"/>
+    <PARAM id="voice3Prob" value="70"/>
+    <PARAM id="voice4Prob" value="70"/>
+    <PARAM id="feedback" value="65"/>
+    <PARAM id="panSpread" value="40"/>
+    <PARAM id="jitter" value="30"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="4000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="voice3Prob" depth="-0.4"/>
+    <SLOT source="8" dest="filterCutoff" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

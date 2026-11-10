@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Sharp Edges" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="60"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="5"/>
+    <PARAM id="size" value="30"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="5"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="windowSkew" value="-80"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterType" value="1"/>
+    <PARAM id="filterCutoff" value="1200"/>
+    <PARAM id="filterReso" value="40"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satType" value="1"/>
+    <PARAM id="satDrive" value="12"/>
+    <PARAM id="step2Gate" value="0"/>
+    <PARAM id="step4Ratchet" value="2"/>
+    <PARAM id="step6Gate" value="0"/>
+    <PARAM id="step7Ratchet" value="3"/>
+    <PARAM id="step10Gate" value="0"/>
+    <PARAM id="step12Ratchet" value="2"/>
+    <PARAM id="step15Ratchet" value="4"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="2" dest="filterCutoff" depth="0.25"/>
+    <SLOT source="7" dest="filterCutoff" depth="0.4"/>
+    <SLOT source="8" dest="satDrive" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

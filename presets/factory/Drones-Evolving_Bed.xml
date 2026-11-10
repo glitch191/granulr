@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Evolving Bed" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-3"/>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="size" value="1200"/>
+    <PARAM id="density" value="9"/>
+    <PARAM id="position" value="600"/>
+    <PARAM id="spray" value="800"/>
+    <PARAM id="feedback" value="68"/>
+    <PARAM id="pitchRandom" value="0.1"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="lfo1Rate" value="0.03"/>
+    <PARAM id="lfo2Rate" value="0.05"/>
+    <PARAM id="lfo4Rate" value="0.02"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="50"/>
+    <PARAM id="diffDecay" value="88"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="2800"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="position" depth="0.2"/>
+    <SLOT source="1" dest="filterCutoff" depth="0.2"/>
+    <SLOT source="3" dest="size" depth="0.2"/>
+    <SLOT source="7" dest="feedback" depth="0.2"/>
+    <SLOT source="8" dest="pitch" depth="0.25"/>
+  </MATRIX>
+</GranulrPreset>

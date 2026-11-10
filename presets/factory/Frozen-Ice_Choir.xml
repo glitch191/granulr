@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Ice Choir" category="Frozen" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="size" value="500"/>
+    <PARAM id="density" value="20"/>
+    <PARAM id="spray" value="1200"/>
+    <PARAM id="position" value="1000"/>
+    <PARAM id="voice2Prob" value="40"/>
+    <PARAM id="voice3Prob" value="40"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="85"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="voice3Prob" depth="0.4"/>
+    <SLOT source="8" dest="spray" depth="0.3"/>
+    <SLOT source="1" dest="size" depth="0.15"/>
+  </MATRIX>
+</GranulrPreset>

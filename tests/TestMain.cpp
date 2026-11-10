@@ -49,11 +49,23 @@ void operator delete (void* memory, std::size_t, std::align_val_t) noexcept { _a
 void operator delete[] (void* memory, std::size_t, std::align_val_t) noexcept { _aligned_free (memory); }
 
 // ---------------------------------------------------------------------------------------------
-int main()
+/** Prints every test message when the runner is started with --verbose. */
+struct Runner final : juce::UnitTestRunner
+{
+    bool verbose = false;
+    void logMessage (const juce::String& message) override
+    {
+        if (verbose)
+            std::cout << message << std::endl;
+    }
+};
+
+int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI juceInit;
 
-    juce::UnitTestRunner runner;
+    Runner runner;
+    runner.verbose = argc > 1 && juce::String (argv[1]) == "--verbose";
     runner.setAssertOnFailure (false);
     runner.runAllTests();
 

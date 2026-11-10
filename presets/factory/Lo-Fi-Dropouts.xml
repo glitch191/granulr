@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Dropouts" category="Lo-Fi" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="100"/>
+    <PARAM id="size" value="100"/>
+    <PARAM id="density" value="30"/>
+    <PARAM id="position" value="40"/>
+    <PARAM id="spray" value="5"/>
+    <PARAM id="panSpread" value="10"/>
+    <PARAM id="rand1Rate" value="3"/>
+    <PARAM id="rand1Smooth" value="10"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="4500"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satDrive" value="8"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="4" dest="density" depth="-0.35"/>
+    <SLOT source="5" dest="fine" depth="0.04"/>
+    <SLOT source="7" dest="density" depth="-0.3"/>
+    <SLOT source="8" dest="filterCutoff" depth="-0.3"/>
+  </MATRIX>
+</GranulrPreset>

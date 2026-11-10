@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Shiver" category="Frozen" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-3"/>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="size" value="40"/>
+    <PARAM id="density" value="70"/>
+    <PARAM id="spray" value="30"/>
+    <PARAM id="position" value="400"/>
+    <PARAM id="jitter" value="90"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="scan" value="0.5"/>
+    <PARAM id="lfo3Rate" value="5"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="2" dest="position" depth="0.01"/>
+    <SLOT source="7" dest="scan" depth="0.3"/>
+    <SLOT source="8" dest="size" depth="0.4"/>
+    <SLOT source="0" dest="panSpread" depth="0.2"/>
+  </MATRIX>
+</GranulrPreset>

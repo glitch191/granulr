@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Glacier" category="Frozen" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="pitch" value="-12"/>
+    <PARAM id="size" value="1500"/>
+    <PARAM id="density" value="5"/>
+    <PARAM id="spray" value="1000"/>
+    <PARAM id="position" value="1200"/>
+    <PARAM id="scan" value="0.05"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="2500"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="90"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="filterCutoff" depth="0.4"/>
+    <SLOT source="8" dest="scan" depth="0.2"/>
+    <SLOT source="3" dest="position" depth="0.2"/>
+  </MATRIX>
+</GranulrPreset>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Rewind" category="Reverse" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="70"/>
+    <PARAM id="reverse" value="100"/>
+    <PARAM id="size" value="400"/>
+    <PARAM id="density" value="10"/>
+    <PARAM id="position" value="450"/>
+    <PARAM id="spray" value="30"/>
+    <PARAM id="jitter" value="20"/>
+    <PARAM id="panSpread" value="30"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="size" depth="0.3"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

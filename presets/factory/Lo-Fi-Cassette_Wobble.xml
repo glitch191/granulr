@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Cassette Wobble" category="Lo-Fi" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="100"/>
+    <PARAM id="size" value="140"/>
+    <PARAM id="density" value="30"/>
+    <PARAM id="position" value="50"/>
+    <PARAM id="spray" value="6"/>
+    <PARAM id="panSpread" value="5"/>
+    <PARAM id="width" value="70"/>
+    <PARAM id="jitter" value="30"/>
+    <PARAM id="lfo1Rate" value="0.4"/>
+    <PARAM id="lfo2Rate" value="3.1"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satDrive" value="10"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="5000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="fine" depth="0.1"/>
+    <SLOT source="1" dest="fine" depth="0.03"/>
+    <SLOT source="7" dest="satDrive" depth="0.3"/>
+    <SLOT source="8" dest="filterCutoff" depth="-0.3"/>
+  </MATRIX>
+</GranulrPreset>

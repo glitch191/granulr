@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Fifth Drone" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-6"/>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="size" value="1500"/>
+    <PARAM id="density" value="8"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="voice2Prob" value="80"/>
+    <PARAM id="voice4Prob" value="60"/>
+    <PARAM id="feedback" value="55"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="50"/>
+    <PARAM id="diffDecay" value="88"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="3000"/>
+    <PARAM id="lfo1Rate" value="0.05"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="filterCutoff" depth="0.15"/>
+    <SLOT source="7" dest="voice2Prob" depth="-0.5"/>
+    <SLOT source="8" dest="feedback" depth="0.2"/>
+  </MATRIX>
+</GranulrPreset>

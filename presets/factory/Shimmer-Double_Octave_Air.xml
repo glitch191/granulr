@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Double Octave Air" category="Shimmer" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="40"/>
+    <PARAM id="voice1Interval" value="12"/>
+    <PARAM id="voice2Interval" value="24"/>
+    <PARAM id="voice2Prob" value="45"/>
+    <PARAM id="feedback" value="50"/>
+    <PARAM id="size" value="180"/>
+    <PARAM id="density" value="32"/>
+    <PARAM id="spray" value="220"/>
+    <PARAM id="position" value="220"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="65"/>
+    <PARAM id="diffDecay" value="78"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="9000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="voice2Prob" depth="0.4"/>
+    <SLOT source="8" dest="feedback" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

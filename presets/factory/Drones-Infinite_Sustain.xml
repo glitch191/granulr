@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Infinite Sustain" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-6"/>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="size" value="700"/>
+    <PARAM id="density" value="8"/>
+    <PARAM id="position" value="150"/>
+    <PARAM id="spray" value="120"/>
+    <PARAM id="feedback" value="66"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="92"/>
+    <PARAM id="diffSize" value="85"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="3500"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.12"/>
+    <SLOT source="8" dest="filterCutoff" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

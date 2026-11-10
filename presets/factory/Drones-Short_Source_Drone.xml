@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GranulrPreset name="Short Source Drone" category="Drones" formatVersion="1">
   <PARAMETERS>
+    <PARAM id="outputGain" value="-4"/>
     <PARAM id="mix" value="85"/>
     <PARAM id="size" value="1400"/>
     <PARAM id="density" value="9"/>
     <PARAM id="position" value="200"/>
     <PARAM id="spray" value="180"/>
-    <PARAM id="feedback" value="78"/>
+    <PARAM id="feedback" value="68"/>
     <PARAM id="pitch" value="-12"/>
     <PARAM id="voice2Prob" value="40"/>
     <PARAM id="voice3Prob" value="30"/>

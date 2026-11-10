@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Vibrato Cloud" category="Chorus" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="100"/>
+    <PARAM id="size" value="70"/>
+    <PARAM id="density" value="45"/>
+    <PARAM id="position" value="20"/>
+    <PARAM id="spray" value="4"/>
+    <PARAM id="panSpread" value="40"/>
+    <PARAM id="jitter" value="40"/>
+    <PARAM id="lfo1Rate" value="5.5"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="fine" depth="0.15"/>
+    <SLOT source="7" dest="lfo1Rate" depth="0.2"/>
+    <SLOT source="8" dest="panSpread" depth="0.5"/>
+  </MATRIX>
+</GranulrPreset>

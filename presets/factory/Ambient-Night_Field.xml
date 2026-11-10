@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Night Field" category="Ambient" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="size" value="260"/>
+    <PARAM id="density" value="20"/>
+    <PARAM id="spray" value="1000"/>
+    <PARAM id="position" value="1200"/>
+    <PARAM id="reverse" value="40"/>
+    <PARAM id="panSpread" value="95"/>
+    <PARAM id="pitchRandom" value="0.1"/>
+    <PARAM id="octaveDown" value="20"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="72"/>
+    <PARAM id="rand1Rate" value="0.3"/>
+    <PARAM id="rand1Smooth" value="90"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="4" dest="position" depth="0.2"/>
+    <SLOT source="7" dest="reverse" depth="0.5"/>
+    <SLOT source="8" dest="octaveDown" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

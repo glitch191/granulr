@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Reverse Shimmer" category="Reverse" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="reverse" value="100"/>
+    <PARAM id="pitch" value="12"/>
+    <PARAM id="size" value="500"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="windowSkew" value="60"/>
+    <PARAM id="position" value="550"/>
+    <PARAM id="spray" value="150"/>
+    <PARAM id="feedback" value="45"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="78"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.3"/>
+    <SLOT source="8" dest="diffMix" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

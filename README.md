@@ -26,7 +26,24 @@ Stereo in, stereo out. No MIDI input, no sidechain, no added latency.
 
 ### Typical uses
 
-Ambient textures, rhythmic glitch, shimmer, frozen pads, granular delay, thickening, reverse swells, pitched cascades, lo-fi wear, ducked textures behind a voice, transient smearing and drones. The factory bank has one starting point for each.
+The factory bank holds 100 presets in 12 categories:
+
+| Category | Presets | What to expect |
+| :- | :- | :- |
+| Ambient | 10 | Slow clouds and washes behind the source |
+| Glitch | 10 | Tempo-synced chops, ratchets and stutters |
+| Shimmer | 9 | Pitched-up feedback through diffusion |
+| Frozen | 9 | Held buffer turned into pads (these presets switch Freeze on) |
+| Delay | 9 | Grain echoes, synced or loose |
+| Chorus | 7 | Thickening, detune and vibrato |
+| Reverse | 7 | Backward grains and swells |
+| Cascades | 8 | Random pitches quantised to a scale |
+| Lo-Fi | 8 | Wobble, band limiting and saturation |
+| Ducked | 6 | Textures that step back while the source plays |
+| Smear | 8 | Blurred transients, pad-like sustain |
+| Drones | 9 | Long feedback beds from short material |
+
+In every preset Macro 1 and Macro 2 are routed to the controls that matter most for that sound, so turning them is the quickest way to adapt it. Presets are defined in `scripts/build-presets.sh`, which regenerates `presets/factory`.
 
 ## Install
 
@@ -62,7 +79,7 @@ Build outputs:
 
 - `build/granulr_artefacts/Release/VST3/granulr.vst3`: the plugin
 - `build/granulr_artefacts/Release/Standalone/granulr.exe`: standalone application
-- `build/Release/granulr_tests.exe`: unit tests
+- `build/Release/granulr_tests.exe`: unit tests (`--verbose` prints the level of every factory preset)
 - `build/Release/granulr_bench.exe`: CPU benchmark (`--quick`, `--seconds N`, `--presets`, `--check`)
 - `build/Release/granulr_shot.exe`: off-screen screenshots (`--out`, `--zoom`, `--preset`, `--mode`, `--mod`, `--browser`)
 
@@ -135,7 +152,7 @@ Measured with `granulr_bench` on a Ryzen 7 9800X3D, one core, as processing time
 | Default settings, mean | 0.30 % | 0.40 % | 0.65 % |
 | Worst case (High quality, maximum density, every effect on), mean | about 6 % | about 11 % | about 11.5 % |
 
-Bypassed, the plugin uses about 0.2 % at 48 kHz. Every factory preset stays under 1.3 % at 96 kHz. Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
+Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 100 factory presets stays under 1.4 % mean (2.1 % at the 99th percentile) at 96 kHz. Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
 
 When the input and the grain tail are silent the engine goes idle. With the editor closed, no analysis is done for the visualisers.
 

@@ -73,7 +73,7 @@ public:
                     expect (source >= 0 && source < numModSources, info.name + ": bad source");
                 }
             }
-            expect (factoryCount >= 12, "only " + juce::String (factoryCount) + " factory presets");
+            expect (factoryCount >= 100, "only " + juce::String (factoryCount) + " factory presets");
         }
 
         beginTest ("Every factory preset renders a healthy signal");

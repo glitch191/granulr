@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Stutter Gate" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="70"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="5"/>
+    <PARAM id="size" value="55"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="5"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="2"/>
+    <PARAM id="panSpread" value="20"/>
+    <PARAM id="step2Ratchet" value="2"/>
+    <PARAM id="step5Gate" value="0"/>
+    <PARAM id="step6Ratchet" value="4"/>
+    <PARAM id="step9Gate" value="0"/>
+    <PARAM id="step10Ratchet" value="2"/>
+    <PARAM id="step13Ratchet" value="3"/>
+    <PARAM id="step14Gate" value="0"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="size" depth="0.3"/>
+    <SLOT source="8" dest="reverse" depth="0.6"/>
+  </MATRIX>
+</GranulrPreset>

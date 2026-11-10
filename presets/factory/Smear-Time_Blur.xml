@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Time Blur" category="Smear" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="70"/>
+    <PARAM id="size" value="250"/>
+    <PARAM id="density" value="50"/>
+    <PARAM id="position" value="150"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="jitter" value="100"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffSize" value="30"/>
+    <PARAM id="diffDecay" value="30"/>
+    <PARAM id="diffMix" value="35"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="spray" depth="0.3"/>
+    <SLOT source="8" dest="position" depth="0.15"/>
+  </MATRIX>
+</GranulrPreset>

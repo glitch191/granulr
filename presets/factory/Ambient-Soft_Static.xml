@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Soft Static" category="Ambient" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="40"/>
+    <PARAM id="size" value="20"/>
+    <PARAM id="density" value="90"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="position" value="150"/>
+    <PARAM id="jitter" value="100"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterType" value="2"/>
+    <PARAM id="filterCutoff" value="3000"/>
+    <PARAM id="filterReso" value="30"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="35"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="3" dest="filterCutoff" depth="0.2"/>
+    <SLOT source="7" dest="density" depth="0.3"/>
+    <SLOT source="8" dest="spray" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

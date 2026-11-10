@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Harp Run" category="Cascades" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="3"/>
+    <PARAM id="scale" value="4"/>
+    <PARAM id="pitchRandom" value="16"/>
+    <PARAM id="size" value="120"/>
+    <PARAM id="position" value="150"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="octaveUp" value="20"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="30"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="pitchRandom" depth="0.3"/>
+    <SLOT source="8" dest="diffMix" depth="0.4"/>
+    <SLOT source="6" dest="octaveUp" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

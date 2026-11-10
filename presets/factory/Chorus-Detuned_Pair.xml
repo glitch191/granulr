@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Detuned Pair" category="Chorus" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="size" value="100"/>
+    <PARAM id="density" value="30"/>
+    <PARAM id="position" value="20"/>
+    <PARAM id="spray" value="5"/>
+    <PARAM id="pitchRandom" value="0.2"/>
+    <PARAM id="fine" value="8"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="jitter" value="50"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="pitchRandom" depth="0.15"/>
+    <SLOT source="8" dest="position" depth="0.03"/>
+  </MATRIX>
+</GranulrPreset>

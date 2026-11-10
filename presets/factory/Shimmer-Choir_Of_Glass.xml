@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Choir Of Glass" category="Shimmer" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="voice1Interval" value="12"/>
+    <PARAM id="voice2Interval" value="19"/>
+    <PARAM id="voice2Prob" value="50"/>
+    <PARAM id="voice3Interval" value="7"/>
+    <PARAM id="voice3Prob" value="40"/>
+    <PARAM id="size" value="420"/>
+    <PARAM id="density" value="20"/>
+    <PARAM id="spray" value="350"/>
+    <PARAM id="position" value="350"/>
+    <PARAM id="feedback" value="40"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="60"/>
+    <PARAM id="diffDecay" value="82"/>
+    <PARAM id="diffSize" value="80"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.3"/>
+    <SLOT source="8" dest="voice3Prob" depth="0.4"/>
+    <SLOT source="0" dest="fine" depth="0.04"/>
+  </MATRIX>
+</GranulrPreset>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Singing Bowl" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-6"/>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="size" value="900"/>
+    <PARAM id="density" value="10"/>
+    <PARAM id="position" value="200"/>
+    <PARAM id="spray" value="150"/>
+    <PARAM id="feedback" value="58"/>
+    <PARAM id="pitchRandom" value="0.04"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterType" value="2"/>
+    <PARAM id="filterCutoff" value="900"/>
+    <PARAM id="filterReso" value="40"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="85"/>
+    <PARAM id="lfo1Rate" value="0.07"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="filterCutoff" depth="0.1"/>
+    <SLOT source="7" dest="filterReso" depth="0.3"/>
+    <SLOT source="8" dest="feedback" depth="0.15"/>
+  </MATRIX>
+</GranulrPreset>

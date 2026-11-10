@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Crushed Grains" category="Lo-Fi" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="70"/>
+    <PARAM id="size" value="8"/>
+    <PARAM id="density" value="120"/>
+    <PARAM id="position" value="20"/>
+    <PARAM id="spray" value="2"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="2"/>
+    <PARAM id="panSpread" value="20"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satType" value="1"/>
+    <PARAM id="satDrive" value="18"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="4000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="size" depth="0.2"/>
+    <SLOT source="8" dest="density" depth="-0.3"/>
+  </MATRIX>
+</GranulrPreset>

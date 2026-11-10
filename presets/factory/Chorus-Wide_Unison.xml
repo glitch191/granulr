@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Wide Unison" category="Chorus" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-3"/>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="size" value="150"/>
+    <PARAM id="density" value="28"/>
+    <PARAM id="position" value="40"/>
+    <PARAM id="spray" value="20"/>
+    <PARAM id="pitchRandom" value="0.18"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="width" value="160"/>
+    <PARAM id="jitter" value="90"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="width" depth="-0.4"/>
+    <SLOT source="8" dest="pitchRandom" depth="0.15"/>
+  </MATRIX>
+</GranulrPreset>

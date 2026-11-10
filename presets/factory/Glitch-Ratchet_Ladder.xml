@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Ratchet Ladder" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="60"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="8"/>
+    <PARAM id="patternLength" value="8"/>
+    <PARAM id="size" value="40"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="8"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="40"/>
+    <PARAM id="octaveUp" value="25"/>
+    <PARAM id="step2Ratchet" value="2"/>
+    <PARAM id="step3Ratchet" value="3"/>
+    <PARAM id="step4Ratchet" value="4"/>
+    <PARAM id="step6Ratchet" value="2"/>
+    <PARAM id="step7Ratchet" value="3"/>
+    <PARAM id="step8Ratchet" value="4"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="octaveUp" depth="0.5"/>
+    <SLOT source="8" dest="size" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Half Time Jump" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="60"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="8"/>
+    <PARAM id="sizeSync" value="1"/>
+    <PARAM id="sizeDiv" value="8"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="14"/>
+    <PARAM id="pitch" value="-12"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="1"/>
+    <PARAM id="panSpread" value="30"/>
+    <PARAM id="reverse" value="15"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="reverse" depth="0.6"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

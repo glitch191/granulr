@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Wide Horizon" category="Ambient" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="size" value="500"/>
+    <PARAM id="density" value="16"/>
+    <PARAM id="spray" value="400"/>
+    <PARAM id="position" value="350"/>
+    <PARAM id="width" value="170"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="voice2Prob" value="30"/>
+    <PARAM id="voice3Prob" value="20"/>
+    <PARAM id="feedback" value="30"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="50"/>
+    <PARAM id="diffDecay" value="78"/>
+    <PARAM id="diffSize" value="75"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="width" depth="0.1"/>
+    <SLOT source="7" dest="voice2Prob" depth="0.4"/>
+    <SLOT source="8" dest="diffDecay" depth="0.2"/>
+  </MATRIX>
+</GranulrPreset>

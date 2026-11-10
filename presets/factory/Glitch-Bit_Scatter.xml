@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Bit Scatter" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="2"/>
+    <PARAM id="size" value="25"/>
+    <PARAM id="spray" value="800"/>
+    <PARAM id="position" value="400"/>
+    <PARAM id="pitchRandom" value="12"/>
+    <PARAM id="scale" value="9"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satType" value="1"/>
+    <PARAM id="satDrive" value="10"/>
+    <PARAM id="step2Prob" value="50"/>
+    <PARAM id="step4Prob" value="40"/>
+    <PARAM id="step6Prob" value="70"/>
+    <PARAM id="step8Prob" value="30"/>
+    <PARAM id="step10Prob" value="60"/>
+    <PARAM id="step12Prob" value="45"/>
+    <PARAM id="step14Prob" value="55"/>
+    <PARAM id="step16Prob" value="35"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="pitchRandom" depth="0.4"/>
+    <SLOT source="8" dest="satDrive" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

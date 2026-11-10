@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Morning Mist" category="Ambient" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="size" value="700"/>
+    <PARAM id="density" value="10"/>
+    <PARAM id="spray" value="900"/>
+    <PARAM id="position" value="600"/>
+    <PARAM id="jitter" value="80"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="pitchRandom" value="0.06"/>
+    <PARAM id="feedback" value="20"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="80"/>
+    <PARAM id="diffSize" value="85"/>
+    <PARAM id="diffDamp" value="45"/>
+    <PARAM id="lfo1Rate" value="0.05"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="position" depth="0.2"/>
+    <SLOT source="1" dest="size" depth="0.15"/>
+    <SLOT source="7" dest="diffMix" depth="0.35"/>
+    <SLOT source="8" dest="spray" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

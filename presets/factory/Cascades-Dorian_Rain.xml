@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Dorian Rain" category="Cascades" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="scale" value="6"/>
+    <PARAM id="root" value="2"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="jitter" value="100"/>
+    <PARAM id="pitchRandom" value="14"/>
+    <PARAM id="size" value="160"/>
+    <PARAM id="position" value="400"/>
+    <PARAM id="spray" value="600"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="octaveUp" value="25"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="40"/>
+    <PARAM id="diffDecay" value="70"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="density" depth="0.3"/>
+    <SLOT source="8" dest="octaveUp" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

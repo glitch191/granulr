@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Octave Doubler" category="Chorus" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="45"/>
+    <PARAM id="size" value="90"/>
+    <PARAM id="density" value="35"/>
+    <PARAM id="position" value="25"/>
+    <PARAM id="spray" value="8"/>
+    <PARAM id="voice1Prob" value="50"/>
+    <PARAM id="voice3Prob" value="30"/>
+    <PARAM id="voice4Prob" value="30"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="jitter" value="60"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="voice3Prob" depth="0.5"/>
+    <SLOT source="8" dest="voice4Prob" depth="0.5"/>
+  </MATRIX>
+</GranulrPreset>

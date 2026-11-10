@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Long Smeared Echo" category="Delay" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="45"/>
+    <PARAM id="size" value="300"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="position" value="750"/>
+    <PARAM id="spray" value="120"/>
+    <PARAM id="jitter" value="40"/>
+    <PARAM id="feedback" value="55"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="4000"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="30"/>
+    <PARAM id="diffSize" value="30"/>
+    <PARAM id="diffDecay" value="30"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="spray" depth="0.3"/>
+    <SLOT source="8" dest="feedback" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

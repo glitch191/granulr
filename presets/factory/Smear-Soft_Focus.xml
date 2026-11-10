@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Soft Focus" category="Smear" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="size" value="140"/>
+    <PARAM id="density" value="70"/>
+    <PARAM id="position" value="50"/>
+    <PARAM id="spray" value="110"/>
+    <PARAM id="jitter" value="100"/>
+    <PARAM id="panSpread" value="50"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="spray" depth="0.3"/>
+    <SLOT source="8" dest="size" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>
