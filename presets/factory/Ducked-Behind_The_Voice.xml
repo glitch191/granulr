@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Behind The Voice" category="Ducked" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="duckAmount" value="85"/>
+    <PARAM id="duckAttack" value="5"/>
+    <PARAM id="duckRelease" value="400"/>
+    <PARAM id="size" value="350"/>
+    <PARAM id="density" value="22"/>
+    <PARAM id="spray" value="500"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="octaveUp" value="25"/>
+    <PARAM id="feedback" value="40"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="65"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="duckAmount" depth="-0.5"/>
+    <SLOT source="8" dest="diffMix" depth="0.4"/>
+    <SLOT source="0" dest="position" depth="0.1"/>
+  </MATRIX>
+</GranulrPreset>

@@ -1,0 +1,73 @@
+name: Release build
+
+# Builds the Windows VST3 when a release is published and attaches it to that release.
+# A manual run (workflow_dispatch) builds the same archive and keeps it as a workflow artifact.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  windows-vst3:
+    name: Windows VST3
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name || 'manual' }}
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      - name: Cache JUCE and build dependencies
+        uses: actions/cache@v6
+        with:
+          path: build/_deps
+          key: deps-${{ runner.os }}-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          $version = "$env:TAG" -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { $version = '0.1.0' }
+          cmake -S . -B build -A x64 "-DGRANULR_COPY_PLUGIN=OFF" "-DGRANULR_VERSION=$version"
+
+      - name: Build (Release)
+        run: cmake --build build --config Release --parallel
+
+      - name: Run unit tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: CPU benchmark (informative, shared runners are not the reference machine)
+        continue-on-error: true
+        run: build/Release/granulr_bench.exe --quick --seconds 5
+
+      - name: Package the VST3 bundle
+        shell: pwsh
+        run: |
+          $bundle = "build/granulr_artefacts/Release/VST3/granulr.vst3"
+          if (-not (Test-Path "$bundle/Contents/x86_64-win/granulr.vst3")) { throw "VST3 bundle not found: $bundle" }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $zip = "dist/granulr-$env:TAG-windows-vst3.zip"
+          Compress-Archive -Path $bundle -DestinationPath $zip -Force
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  granulr-$env:TAG-windows-vst3.zip" | Out-File -Encoding ascii "$zip.sha256"
+          Get-ChildItem dist
+
+      - name: Attach the files to the release
+        if: github.event_name == 'release'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$env:TAG" (Get-ChildItem dist -File | ForEach-Object { $_.FullName }) --clobber --repo "${{ github.repository }}"
+
+      - name: Keep the files as a workflow artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v7
+        with:
+          name: granulr-windows-vst3
+          path: dist/*
+          if-no-files-found: error

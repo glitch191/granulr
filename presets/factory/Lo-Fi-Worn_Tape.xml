@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Worn Tape" category="Lo-Fi" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="100"/>
+    <PARAM id="size" value="120"/>
+    <PARAM id="density" value="35"/>
+    <PARAM id="position" value="60"/>
+    <PARAM id="spray" value="8"/>
+    <PARAM id="pitchRandom" value="0.08"/>
+    <PARAM id="panSpread" value="10"/>
+    <PARAM id="width" value="80"/>
+    <PARAM id="jitter" value="30"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satDrive" value="14"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="3200"/>
+    <PARAM id="filterReso" value="15"/>
+    <PARAM id="lfo1Shape" value="1"/>
+    <PARAM id="lfo1Rate" value="0.7"/>
+    <PARAM id="rand1Rate" value="6"/>
+    <PARAM id="rand1Smooth" value="80"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="fine" depth="0.12"/>
+    <SLOT source="4" dest="fine" depth="0.05"/>
+    <SLOT source="7" dest="satDrive" depth="0.4"/>
+    <SLOT source="8" dest="filterCutoff" depth="0.35"/>
+  </MATRIX>
+</GranulrPreset>

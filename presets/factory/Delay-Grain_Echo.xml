@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Grain Echo" category="Delay" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="40"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="8"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="10"/>
+    <PARAM id="sizeSync" value="1"/>
+    <PARAM id="sizeDiv" value="8"/>
+    <PARAM id="feedback" value="55"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="panSpread" value="40"/>
+    <PARAM id="windowShape" value="1"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="4500"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.4"/>
+    <SLOT source="8" dest="filterCutoff" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

@@ -246,7 +246,7 @@ MainPanel::MainPanel (UiContext& c, VisualEngine& engine)
 
     // Pitch -----------------------------------------------------------------------------------
     pitchKnobs.addArray ({ &addKnob (pitchSection, pid::pitch, "Pitch"), &addKnob (pitchSection, pid::fine, "Fine"),
-                           &addKnob (pitchSection, pid::pitchRandom, "Random"), &addKnob (pitchSection, pid::octaveUp, "Oct Up"),
+                           &addKnob (pitchSection, pid::pitchRandom, "Random"), &addKnob (pitchSection, pid::octaveUp, "Oct +"),
                            &addKnob (pitchSection, pid::octaveDown, "Oct -") });
     for (int v = 1; v <= numHarmonyVoices; ++v)
     {

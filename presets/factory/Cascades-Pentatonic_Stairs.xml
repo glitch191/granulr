@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Pentatonic Stairs" category="Cascades" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="5"/>
+    <PARAM id="scale" value="5"/>
+    <PARAM id="root" value="9"/>
+    <PARAM id="pitchRandom" value="14"/>
+    <PARAM id="size" value="160"/>
+    <PARAM id="octaveUp" value="30"/>
+    <PARAM id="position" value="180"/>
+    <PARAM id="feedback" value="35"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="75"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="25"/>
+    <PARAM id="step2Prob" value="70"/>
+    <PARAM id="step5Prob" value="60"/>
+    <PARAM id="step10Prob" value="75"/>
+    <PARAM id="step13Ratchet" value="2"/>
+    <PARAM id="step15Prob" value="50"/>
+    <PARAM id="step16Ratchet" value="3"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="pitchRandom" depth="0.4"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+    <SLOT source="6" dest="octaveUp" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

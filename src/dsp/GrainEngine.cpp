@@ -218,7 +218,7 @@ void GrainEngine::spawnGrain (const EngineParams& p, int startDelay, float spray
     for (int a = 0; a < numActive; ++a)
         if (grains[static_cast<size_t> (activeList[static_cast<size_t> (a)])].fadeStep < 0.0f)
             ++fading;
-    if (numActive - fading >= maxGrainsForQuality (p.quality))
+    if (numActive - fading >= maxGrains (p.quality))
         stealOldest();
     if (numFree == 0)
         return;

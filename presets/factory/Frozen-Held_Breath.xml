@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Held Breath" category="Frozen" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="80"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="size" value="600"/>
+    <PARAM id="density" value="18"/>
+    <PARAM id="spray" value="1500"/>
+    <PARAM id="position" value="1000"/>
+    <PARAM id="scan" value="0.15"/>
+    <PARAM id="pitchRandom" value="0.05"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="jitter" value="70"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="50"/>
+    <PARAM id="diffDecay" value="85"/>
+    <PARAM id="diffSize" value="80"/>
+    <PARAM id="lfo1Rate" value="0.05"/>
+    <PARAM id="lfo2Rate" value="0.11"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="position" depth="0.2"/>
+    <SLOT source="1" dest="size" depth="0.2"/>
+    <SLOT source="7" dest="scan" depth="0.25"/>
+    <SLOT source="8" dest="pitch" depth="0.25"/>
+  </MATRIX>
+</GranulrPreset>

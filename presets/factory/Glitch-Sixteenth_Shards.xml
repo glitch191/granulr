@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Sixteenth Shards" category="Glitch" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="55"/>
+    <PARAM id="triggerMode" value="2"/>
+    <PARAM id="patternRate" value="5"/>
+    <PARAM id="size" value="70"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="8"/>
+    <PARAM id="reverse" value="30"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="octaveUp" value="20"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satDrive" value="9"/>
+    <PARAM id="panSpread" value="60"/>
+    <PARAM id="step3Gate" value="0"/>
+    <PARAM id="step7Gate" value="0"/>
+    <PARAM id="step11Gate" value="0"/>
+    <PARAM id="step4Ratchet" value="2"/>
+    <PARAM id="step8Ratchet" value="3"/>
+    <PARAM id="step12Ratchet" value="2"/>
+    <PARAM id="step16Ratchet" value="4"/>
+    <PARAM id="step6Prob" value="60"/>
+    <PARAM id="step14Prob" value="50"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="reverse" depth="0.6"/>
+    <SLOT source="8" dest="size" depth="0.35"/>
+    <SLOT source="4" dest="panSpread" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>
