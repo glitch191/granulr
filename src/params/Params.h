@@ -41,6 +41,9 @@ struct ParamRefs
     Raw randRate[numRandoms], randSmooth[numRandoms], randSync[numRandoms], randDiv[numRandoms];
     Raw envSource, envAttack, envRelease, envGain;
     Raw macro[numMacros];
+    Raw onsetSens, onsetBurst;
+    Raw resOn, resDamp, resOctave, resPlace;
+    Raw driftRate, driftPull, chaosRate, chaosShape, bounceRate, bounceDamp, gestureRate;
 
     // Modulation destinations
     Raw dest[numModDests];

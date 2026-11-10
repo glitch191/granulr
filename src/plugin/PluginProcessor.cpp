@@ -92,6 +92,20 @@ void GranulrProcessor::readParams (EngineParams& ep, ModSourceParams& mp) const 
     ep.satPlace = index (refs.satPlace);
     ep.diffOn = flag (refs.diffOn);
     ep.diffPlace = index (refs.diffPlace);
+    ep.resOn = flag (refs.resOn);
+    ep.resDamp = real (refs.resDamp) * 0.01f;
+    ep.resOctave = static_cast<int> (std::round (real (refs.resOctave)));
+    ep.resPlace = index (refs.resPlace);
+    ep.onsetSens = real (refs.onsetSens) * 0.01f;
+    ep.onsetBurst = index (refs.onsetBurst);
+
+    mp.driftRate = real (refs.driftRate);
+    mp.driftPull = real (refs.driftPull) * 0.01f;
+    mp.chaosRate = real (refs.chaosRate);
+    mp.chaosShape = real (refs.chaosShape) * 0.01f;
+    mp.bounceRate = real (refs.bounceRate);
+    mp.bounceDamp = real (refs.bounceDamp) * 0.01f;
+    mp.gestureRate = real (refs.gestureRate);
 
     for (int n = 0; n < numLfos; ++n)
     {
@@ -152,6 +166,14 @@ void GranulrProcessor::applyDestinations (const float* v, EngineParams& ep, ModS
         mp.lfoRate[n] = v[dstLfo1Rate + n];
     for (int n = 0; n < numRandoms; ++n)
         mp.randRate[n] = v[dstRand1Rate + n];
+    ep.flock = v[dstFlock] * 0.01f;
+    ep.evolve = v[dstEvolve] * 0.01f;
+    ep.wear = v[dstWear] * 0.01f;
+    ep.distance = v[dstDistance] * 0.01f;
+    ep.orbit = v[dstOrbit] * 0.01f;
+    ep.doppler = v[dstDoppler] * 0.01f;
+    ep.resMix = v[dstResMix] * 0.01f;
+    ep.resDecay = v[dstResDecay] * 0.01f;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -261,7 +283,7 @@ void GranulrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
                 }
             }
             applyDestinations (values, ep, mp);
-            modulation.process (mp, n, lastInputPeak, lastOutputPeak);
+            modulation.process (mp, n, lastInputPeak, lastOutputPeak, engine.getAnalysisValues());
 
             float dryL[GrainEngine::maxSubBlock], dryR[GrainEngine::maxSubBlock];
             const bool crossfading = bypassed || bypassMix > 0.0f;

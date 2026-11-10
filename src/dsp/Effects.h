@@ -151,6 +151,124 @@ private:
 };
 
 // ---------------------------------------------------------------------------------------------
+/** Tuned resonator: a bank of damped comb filters set on the notes of a scale, excited by the
+    signal like sympathetic strings. */
+class Resonator
+{
+public:
+    static constexpr int maxLines = 6;
+
+    void prepare (double sampleRate)
+    {
+        fs = static_cast<float> (sampleRate);
+        lineLength = nextPowerOfTwo (static_cast<int> (fs / 30.0f) + 16);
+        lineMask = lineLength - 1;
+        for (auto& line : lines)
+            line.assign (static_cast<size_t> (lineLength), 0.0f);
+        slewCoef = onePoleCoef (0.02f, fs);
+        reset();
+    }
+
+    void reset() noexcept
+    {
+        for (auto& line : lines)
+            std::fill (line.begin(), line.end(), 0.0f);
+        for (int l = 0; l < maxLines; ++l)
+        {
+            dampState[l] = 0.0f;
+            delay[l] = targetDelay[l];
+        }
+        writeIndex = 0;
+    }
+
+    /** Frequency of a line in Hz after the last setParams call (for tests and display). */
+    float getFrequency (int line) const noexcept { return frequency[std::clamp (line, 0, maxLines - 1)]; }
+    int getNumLines() const noexcept { return activeLines; }
+
+    /** scaleBits: bit n set when pitch class n above the root is allowed (0 = no scale, uses
+        root and fifth). decay, damping and mixAmount are 0..1. Call at control rate. */
+    void setParams (uint16_t scaleBits, int root, int octave, float decay, float damping,
+                    float mixAmount, int numLines) noexcept
+    {
+        activeLines = std::clamp (numLines, 1, maxLines);
+        mix = std::clamp (mixAmount, 0.0f, 1.0f);
+        dampCoef = 1.0f - 0.8f * std::clamp (damping, 0.0f, 1.0f);
+        const float t60 = 0.15f * std::pow (60.0f, std::clamp (decay, 0.0f, 1.0f));
+
+        if ((scaleBits & 0x0fff) == 0)
+            scaleBits = 0x0081;
+
+        // The most consonant degrees first, then octave copies when the scale has few notes.
+        static const int priority[12] { 0, 7, 4, 3, 10, 11, 2, 5, 9, 8, 6, 1 };
+        int notes[maxLines];
+        int count = 0;
+        for (int k = 0; k < 12 && count < activeLines; ++k)
+            if ((scaleBits >> priority[k]) & 1u)
+                notes[count++] = priority[k];
+        const int distinct = count;
+        for (int k = 0; count < activeLines; ++k)
+            notes[count++] = notes[k % distinct] + 12 * (1 + k / distinct);
+        std::sort (notes, notes + activeLines);
+
+        const float base = 48.0f + static_cast<float> (root) + 12.0f * static_cast<float> (octave);
+        const float filterDelay = (1.0f - dampCoef) / dampCoef;
+        for (int l = 0; l < activeLines; ++l)
+        {
+            const float hz = 440.0f * std::exp2 ((base + static_cast<float> (notes[l]) - 69.0f) / 12.0f);
+            frequency[l] = hz;
+            targetDelay[l] = std::clamp (fs / hz - filterDelay, 2.0f, static_cast<float> (lineLength - 4));
+            feedback[l] = std::pow (10.0f, -3.0f / (hz * t60));
+            inputGain[l] = std::sqrt (std::max (0.0f, 1.0f - feedback[l] * feedback[l]));
+            const float pan = activeLines > 1 ? static_cast<float> (l) / static_cast<float> (activeLines - 1) : 0.5f;
+            const float angle = (0.2f + 0.6f * ((l & 1) ? 1.0f - pan : pan)) * 0.5f * kPi;
+            panL[l] = std::cos (angle);
+            panR[l] = std::sin (angle);
+        }
+    }
+
+    void process (float* left, float* right, int numSamples) noexcept
+    {
+        const int n = activeLines;
+        const float norm = 1.6f / std::sqrt (static_cast<float> (n));
+
+        for (int i = 0; i < numSamples; ++i)
+        {
+            const float input = 0.5f * (left[i] + right[i]);
+            float outL = 0.0f, outR = 0.0f;
+            for (int l = 0; l < n; ++l)
+            {
+                delay[l] += slewCoef * (targetDelay[l] - delay[l]);
+                const float readPos = static_cast<float> (writeIndex) - delay[l];
+                const float floorPos = std::floor (readPos);
+                const float frac = readPos - floorPos;
+                const int i0 = static_cast<int> (floorPos) & lineMask;
+                const int i1 = (i0 + 1) & lineMask;
+                auto& line = lines[l];
+                const float tap = line[static_cast<size_t> (i0)]
+                                  + frac * (line[static_cast<size_t> (i1)] - line[static_cast<size_t> (i0)]);
+                dampState[l] += dampCoef * (tap - dampState[l]);
+                const float y = input * inputGain[l] + feedback[l] * dampState[l];
+                line[static_cast<size_t> (writeIndex)] = y;
+                outL += y * panL[l];
+                outR += y * panR[l];
+            }
+            writeIndex = (writeIndex + 1) & lineMask;
+            left[i] += mix * (outL * norm - left[i]);
+            right[i] += mix * (outR * norm - right[i]);
+        }
+    }
+
+private:
+    float fs = 48000.0f;
+    int lineLength = 2048, lineMask = 2047, writeIndex = 0, activeLines = maxLines;
+    std::array<std::vector<float>, maxLines> lines;
+    float delay[maxLines] {}, targetDelay[maxLines] { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f };
+    float feedback[maxLines] {}, inputGain[maxLines] {}, dampState[maxLines] {};
+    float panL[maxLines] {}, panR[maxLines] {}, frequency[maxLines] {};
+    float dampCoef = 1.0f, slewCoef = 0.001f, mix = 0.4f;
+};
+
+// ---------------------------------------------------------------------------------------------
 /** Light diffusion and reverb: 4 allpass stages followed by a feedback delay network. */
 class Diffuser
 {

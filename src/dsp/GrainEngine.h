@@ -7,6 +7,7 @@
 // process() is real-time safe: no allocation, no lock, no system call.
 #pragma once
 
+#include "Analysis.h"
 #include "EngineParams.h"
 #include "Effects.h"
 #include "Pitch.h"
@@ -36,6 +37,7 @@ public:
         float pan;        // 0..1
         float level;      // current window level 0..1
         float spanNorm;   // length of buffer read by the grain, relative to the buffer
+        float depth;      // 0 = close, 1 = far
     };
 
     GrainEngine();
@@ -70,6 +72,9 @@ public:
 
     PitchTracker& getPitchTracker() noexcept { return tracker; }
 
+    /** Input analysis of the last sub-block, for the modulation sources. */
+    AnalysisValues getAnalysisValues() const noexcept { return analysisValues; }
+
 private:
     struct Grain
     {
@@ -82,6 +87,11 @@ private:
         const float* table = nullptr;
         uint32_t serial = 0;
         float pitch = 0.0f, pan = 0.5f, span = 0.0f;
+        // Space per grain (only used when spatial is set)
+        bool spatial = false;
+        float depth = 0.0f, lpCoef = 1.0f, lpL = 0.0f, lpR = 0.0f;
+        float gainStepL = 0.0f, gainStepR = 0.0f;
+        int64_t incStep = 0;
     };
 
     struct Smoothed
@@ -103,11 +113,13 @@ private:
     void spawnGrain (const EngineParams& params, int startDelay, float sprayRandom, float rate) noexcept;
     void stealOldest() noexcept;
     void killAllGrains() noexcept;
-    template <bool useHermite>
+    template <bool useHermite, bool spatial>
     void renderGrain (Grain& grain, float* wetL, float* wetR, int numSamples) noexcept;
     void renderGrains (float* wetL, float* wetR, int numSamples, bool useHermite) noexcept;
     void schedule (const EngineParams& params, int numSamples) noexcept;
     void enterFreeze() noexcept;
+    void evolveBuffer (const EngineParams& params, const float* wetL, const float* wetR, int numSamples) noexcept;
+    float flocked (float& state, float uniform, float amount) noexcept;
     void applyEffects (const EngineParams& params, int place, float* left, float* right, int numSamples) noexcept;
     void updateEffectParams (const EngineParams& params) noexcept;
     double positionFrames (const EngineParams& params) const noexcept;
@@ -133,6 +145,21 @@ private:
 
     Rng rng;
     PitchTracker tracker;
+    Rng spaceRng;                 // separate generator: new features never shift the main sequence
+    InputAnalysis analysis;
+    AnalysisValues analysisValues;
+    float flockSpray = 0.5f, flockPitch = 0.5f, flockPan = 0.5f;
+    float flockAmount = 0.0f;     // valid during spawnGrain
+
+    // Onset trigger
+    int burstRemaining = 0;
+    double nextBurst = 0.0;
+
+    // Living buffer
+    int64_t evolveOffset = 0;
+    float wearLp[2] { 0.0f, 0.0f };
+    float evolvePeak = 0.0f, evolveEnvOld = 0.0f, evolveEnvWet = 0.0f;
+    int evolveBin = -1;
 
     // Scheduler state
     double nextSpawn = 0.0;
@@ -151,9 +178,10 @@ private:
     StateVariableFilter filter;
     Saturator saturator;
     Diffuser diffuser;
+    Resonator resonator;
     SafetyLimiter limiter;
     DcBlocker dcBlocker;
-    bool filterWasOn = false, satWasOn = false, diffWasOn = false;
+    bool filterWasOn = false, satWasOn = false, diffWasOn = false, resWasOn = false;
 
     // Idle detection
     int64_t silentWriteFrames = 0, silentWetFrames = 0;

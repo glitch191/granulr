@@ -76,7 +76,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addChoice (layout, pid::sizeDiv, "Size Division", divisions, divisionSixteenth);
     addFloat (layout, pid::density, "Density", skewed (0.5f, 400.0f, 20.0f), 20.0f, "gr/s", 1);
     addChoice (layout, pid::densityDiv, "Density Division", divisions, divisionSixteenth);
-    addChoice (layout, pid::triggerMode, "Trigger", { "Free", "Sync", "Pattern" }, triggerFree);
+    addChoice (layout, pid::triggerMode, "Trigger", { "Free", "Sync", "Pattern", "Onset" }, triggerFree);
     addFloat (layout, pid::spray, "Spray", skewed (0.0f, 2000.0f, 150.0f), 20.0f, "ms", 0);
     addFloat (layout, pid::jitter, "Jitter", Range (0.0f, 100.0f, 0.01f), 10.0f, "%", 0);
     addFloat (layout, pid::pitch, "Pitch", Range (-24.0f, 24.0f, 1.0f), 0.0f, "st", 0);
@@ -93,6 +93,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addFloat (layout, pid::duckRelease, "Duck Release", skewed (20.0f, 2000.0f, 250.0f), 250.0f, "ms", 0);
     addBool (layout, pid::limiter, "Limiter", true);
     addChoice (layout, pid::quality, "Quality", { "Eco", "Normal", "High" }, qualityNormal);
+    addFloat (layout, pid::onsetSens, "Onset Sensitivity", Range (0.0f, 100.0f, 0.01f), 50.0f, "%", 0);
+    addInt (layout, pid::onsetBurst, "Onset Burst", 1, 16, 4);
+    addFloat (layout, pid::flock, "Flock", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::evolve, "Evolve", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::wear, "Wear", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::distance, "Distance", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::orbit, "Orbit", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::doppler, "Doppler", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
 
     // Pitch and scale
     addChoice (layout, pid::scale, "Scale",
@@ -140,6 +148,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addFloat (layout, pid::diffDamp, "Diffusion Damping", Range (0.0f, 100.0f, 0.01f), 30.0f, "%", 0);
     addFloat (layout, pid::diffMix, "Diffusion Mix", Range (0.0f, 100.0f, 0.01f), 30.0f, "%", 0);
     addChoice (layout, pid::diffPlace, "Diffusion Placement", placeNames, placePost);
+    addBool (layout, pid::resOn, "Resonator", false);
+    addFloat (layout, pid::resMix, "Resonator Mix", Range (0.0f, 100.0f, 0.01f), 40.0f, "%", 0);
+    addFloat (layout, pid::resDecay, "Resonator Decay", Range (0.0f, 100.0f, 0.01f), 60.0f, "%", 0);
+    addFloat (layout, pid::resDamp, "Resonator Damping", Range (0.0f, 100.0f, 0.01f), 30.0f, "%", 0);
+    addInt (layout, pid::resOctave, "Resonator Octave", -2, 2, 0);
+    addChoice (layout, pid::resPlace, "Resonator Placement", placeNames, placePost);
 
     // Modulation sources
     const juce::StringArray lfoShapes { "Sine", "Triangle", "Saw", "Square", "Smooth Random", "Sample and Hold" };
@@ -168,6 +182,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addFloat (layout, pid::envGain, "Envelope Gain", Range (-24.0f, 24.0f, 0.01f), 0.0f, "dB", 1);
     for (int n = 1; n <= numMacros; ++n)
         addFloat (layout, pid::macro (n), "Macro " + juce::String (n), Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::driftRate, "Drift Rate", skewed (0.01f, 10.0f, 0.5f), 0.2f, "Hz", 2);
+    addFloat (layout, pid::driftPull, "Drift Pull", Range (0.0f, 100.0f, 0.01f), 30.0f, "%", 0);
+    addFloat (layout, pid::chaosRate, "Chaos Rate", skewed (0.01f, 10.0f, 0.5f), 0.3f, "Hz", 2);
+    addFloat (layout, pid::chaosShape, "Chaos Shape", Range (0.0f, 100.0f, 0.01f), 0.0f, "%", 0);
+    addFloat (layout, pid::bounceRate, "Bounce Rate", skewed (0.1f, 10.0f, 1.0f), 1.0f, "Hz", 2);
+    addFloat (layout, pid::bounceDamp, "Bounce Damping", Range (0.0f, 100.0f, 0.01f), 30.0f, "%", 0);
+    addFloat (layout, pid::gestureRate, "Gesture Rate", skewed (0.25f, 4.0f, 1.0f), 1.0f, "x", 2);
 
     return layout;
 }
@@ -176,17 +197,20 @@ ParamGroup paramGroupOf (const juce::String& paramId)
 {
     static const juce::StringArray grains { pid::position, pid::scan, pid::size, pid::density, pid::spray,
                                             pid::jitter, pid::reverse, pid::windowShape, pid::windowSkew,
-                                            pid::panSpread, pid::width, pid::feedback };
+                                            pid::panSpread, pid::width, pid::feedback, pid::flock, pid::evolve,
+                                            pid::wear, pid::distance, pid::orbit, pid::doppler };
     static const juce::StringArray pitches { pid::pitch, pid::pitchRandom, pid::octaveUp, pid::octaveDown };
 
     if (grains.contains (paramId))
         return groupGrains;
     if (pitches.contains (paramId) || paramId.startsWith ("voice"))
         return groupPitch;
-    if (paramId.startsWith ("filter") || paramId.startsWith ("sat") || paramId.startsWith ("diff"))
+    if (paramId.startsWith ("filter") || paramId.startsWith ("sat") || paramId.startsWith ("diff")
+        || (paramId.startsWith ("res") && paramId != pid::resOctave))
         return groupEffects;
     if (paramId.startsWith ("lfo") || paramId.startsWith ("rand") || paramId == pid::envAttack
-        || paramId == pid::envRelease)
+        || paramId == pid::envRelease || paramId.startsWith ("drift") || paramId.startsWith ("chaos")
+        || paramId.startsWith ("bounce"))
         return groupModulation;
     return groupNone;
 }
@@ -266,6 +290,14 @@ ParamRefs::ParamRefs (juce::AudioProcessorValueTreeState& state)
     envRelease = raw (pid::envRelease);     envGain = raw (pid::envGain);
     for (int n = 0; n < numMacros; ++n)
         macro[n] = raw (pid::macro (n + 1));
+
+    onsetSens = raw (pid::onsetSens);       onsetBurst = raw (pid::onsetBurst);
+    resOn = raw (pid::resOn);               resDamp = raw (pid::resDamp);
+    resOctave = raw (pid::resOctave);       resPlace = raw (pid::resPlace);
+    driftRate = raw (pid::driftRate);       driftPull = raw (pid::driftPull);
+    chaosRate = raw (pid::chaosRate);       chaosShape = raw (pid::chaosShape);
+    bounceRate = raw (pid::bounceRate);     bounceDamp = raw (pid::bounceDamp);
+    gestureRate = raw (pid::gestureRate);
 
     for (int d = 0; d < numModDests; ++d)
     {

@@ -78,6 +78,22 @@ struct EngineParams
     float diffDamp = 0.3f;
     float diffMix = 0.3f;
     int diffPlace = placePost;
+    bool resOn = false;
+    float resMix = 0.4f;
+    float resDecay = 0.6f;
+    float resDamp = 0.3f;
+    int resOctave = 0;
+    int resPlace = placePost;
+
+    // Listening, motion, living buffer, space (all neutral at these defaults)
+    float onsetSens = 0.5f;       // 0..1
+    int onsetBurst = 4;           // grains per detected onset
+    float flock = 0.0f;           // 0..1, correlation between successive grains
+    float evolve = 0.0f;          // 0..1, grains rewritten into the frozen buffer
+    float wear = 0.0f;            // 0..1, erosion of the frozen buffer
+    float distance = 0.0f;        // 0..1, depth spread
+    float orbit = 0.0f;           // 0..1, pan travel during a grain
+    float doppler = 0.0f;         // 0..1, pitch glide during a grain
 
     // Transport, valid for the first sample of the sub-block
     double bpm = 120.0;

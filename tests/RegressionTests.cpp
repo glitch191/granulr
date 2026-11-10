@@ -89,9 +89,9 @@ public:
 
         for (const auto& reference : references)
         {
-            const juce::String name (reference.preset);
-            const auto measured = render (name);
-            const auto label = name.isEmpty() ? juce::String ("defaults") : name;
+            const juce::String presetName (reference.preset);
+            const auto measured = render (presetName);
+            const auto label = presetName.isEmpty() ? juce::String ("defaults") : presetName;
             logMessage (label + ": { " + juce::String (measured.level, 9) + ", " + juce::String (measured.pattern, 9) + " }");
             expectWithinAbsoluteError (measured.level, reference.level, 2.0e-6, label + " level");
             expectWithinAbsoluteError (measured.pattern, reference.pattern, 2.0e-5, label + " pattern");

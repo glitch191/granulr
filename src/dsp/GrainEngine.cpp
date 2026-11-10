@@ -83,6 +83,8 @@ void GrainEngine::prepare (double sampleRate)
     tracker.prepare (fs);
     filter.prepare (fs);
     diffuser.prepare (fs);
+    resonator.prepare (fs);
+    analysis.prepare (fs);
     limiter.prepare (fs);
     dcBlocker.prepare (fs);
     reset();
@@ -115,9 +117,23 @@ void GrainEngine::reset() noexcept
     filter.reset();
     saturator.reset();
     diffuser.reset();
+    resonator.reset();
+    analysis.reset();
+    analysisValues = {};
+    spaceRng.seed (0x7f4a7c15u);
+    flockSpray = flockPitch = flockPan = 0.5f;
+    flockAmount = 0.0f;
+    burstRemaining = 0;
+    nextBurst = 0.0;
+    evolveOffset = 0;
+    wearLp[0] = wearLp[1] = 0.0f;
+    evolvePeak = 0.0f;
+    evolveEnvOld = evolveEnvWet = 0.0f;
+    dcBlocker.reset();
+    evolveBin = -1;
     limiter.reset();
     dcBlocker.reset();
-    filterWasOn = satWasOn = diffWasOn = false;
+    filterWasOn = satWasOn = diffWasOn = resWasOn = false;
 
     silentWriteFrames = bufferLength;
     silentWetFrames = 0;
@@ -153,7 +169,10 @@ double GrainEngine::sizeFrames (const EngineParams& p) const noexcept
 
 float GrainEngine::resolveSemitones (const EngineParams& p, int64_t centreFrame) noexcept
 {
-    float semitones = p.pitch + p.pitchRandom * rng.bi();
+    float pitchDraw = rng.bi();
+    if (flockAmount > 0.0f)
+        pitchDraw = flocked (flockPitch, 0.5f + 0.5f * pitchDraw, flockAmount) * 2.0f - 1.0f;
+    float semitones = p.pitch + p.pitchRandom * pitchDraw;
 
     float totalWeight = 0.0f;
     for (float weight : p.voiceProb)
@@ -223,6 +242,20 @@ void GrainEngine::spawnGrain (const EngineParams& p, int startDelay, float spray
     if (numFree == 0)
         return;
 
+    flockAmount = std::clamp (p.flock, 0.0f, 1.0f);
+    if (flockAmount > 0.0f)
+        sprayRandom = flocked (flockSpray, sprayRandom, flockAmount);
+
+    // Space per grain: drawn from a separate generator so the main sequence is unchanged.
+    const bool spatial = p.distance > 0.0f || p.orbit > 0.0f || p.doppler > 0.0f;
+    float depth = 0.0f, panTravel = 0.0f, glide = 0.0f;
+    if (spatial)
+    {
+        depth = std::clamp (p.distance, 0.0f, 1.0f) * spaceRng.uni();
+        panTravel = std::clamp (p.orbit, 0.0f, 1.0f) * spaceRng.bi();
+        glide = 0.12f * std::clamp (p.doppler, 0.0f, 1.0f) * spaceRng.uni();
+    }
+
     double duration = sizeFrames (p);
     const bool reversed = p.reverse > 0.0f && rng.uni() < p.reverse;
 
@@ -249,6 +282,8 @@ void GrainEngine::spawnGrain (const EngineParams& p, int startDelay, float spray
     double minDelay = margin;
     if (! reversed)
         minDelay += frozen ? span : std::max (0.0, (ratio - 1.0) * duration);
+    if (glide > 0.0f)
+        minDelay += 0.25 * static_cast<double> (glide) * span + 2.0; // the glide reads ahead at first
     delay = std::clamp (delay, minDelay, std::max (minDelay, wrap));
 
     const int index = freeList[static_cast<size_t> (--numFree)];
@@ -277,7 +312,10 @@ void GrainEngine::spawnGrain (const EngineParams& p, int startDelay, float spray
     // Overlap compensation keeps the level steady when density or size change.
     const float overlap = rate * static_cast<float> (duration / fs);
     const float amplitude = 1.0f / std::sqrt (std::max (1.0f, 0.4f * overlap));
-    const float pan = std::clamp (0.5f + 0.5f * p.panSpread * rng.bi(), 0.0f, 1.0f);
+    float panDraw = rng.bi();
+    if (flockAmount > 0.0f)
+        panDraw = flocked (flockPan, 0.5f + 0.5f * panDraw, flockAmount) * 2.0f - 1.0f;
+    const float pan = std::clamp (0.5f + 0.5f * p.panSpread * panDraw, 0.0f, 1.0f);
     g.gainL = amplitude * std::min (1.0f, 1.41421356f * std::cos (pan * 0.5f * kPi));
     g.gainR = amplitude * std::min (1.0f, 1.41421356f * std::sin (pan * 0.5f * kPi));
     g.fade = 1.0f;
@@ -286,10 +324,32 @@ void GrainEngine::spawnGrain (const EngineParams& p, int startDelay, float spray
     g.pitch = semitones;
     g.pan = pan;
     g.span = static_cast<float> (span);
+
+    g.spatial = spatial;
+    g.depth = depth;
+    g.incStep = 0;
+    if (spatial)
+    {
+        // Far grains are quieter and duller; orbit moves the pan and doppler bends the pitch.
+        const float nearGain = 1.0f / (1.0f + 3.0f * depth);
+        const float cutoff = 18000.0f * std::exp2 (-5.0f * depth);
+        g.lpCoef = depth > 0.0f ? 1.0f - std::exp (-kTwoPi * cutoff / static_cast<float> (fs)) : 1.0f;
+        g.lpL = g.lpR = 0.0f;
+        const float panEnd = std::clamp (pan + panTravel, 0.0f, 1.0f);
+        const float endL = amplitude * nearGain * std::min (1.0f, 1.41421356f * std::cos (panEnd * 0.5f * kPi));
+        const float endR = amplitude * nearGain * std::min (1.0f, 1.41421356f * std::sin (panEnd * 0.5f * kPi));
+        g.gainL *= nearGain;
+        g.gainR *= nearGain;
+        g.gainStepL = (endL - g.gainL) / static_cast<float> (total);
+        g.gainStepR = (endR - g.gainR) / static_cast<float> (total);
+        const auto baseInc = static_cast<double> (g.inc);
+        g.inc = static_cast<int64_t> (baseInc * (1.0 + static_cast<double> (glide)));
+        g.incStep = static_cast<int64_t> (-2.0 * static_cast<double> (glide) * baseInc / static_cast<double> (total));
+    }
 }
 
 // ---------------------------------------------------------------------------------------------
-template <bool useHermite>
+template <bool useHermite, bool spatial>
 void GrainEngine::renderGrain (Grain& g, float* wetL, float* wetR, int numSamples) noexcept
 {
     int i = 0;
@@ -321,13 +381,16 @@ void GrainEngine::renderGrain (Grain& g, float* wetL, float* wetR, int numSample
         }
 
         uint64_t phase = g.phase;
-        const uint64_t inc = static_cast<uint64_t> (g.inc);
+        uint64_t inc = static_cast<uint64_t> (g.inc);
+        [[maybe_unused]] const uint64_t incStep = static_cast<uint64_t> (g.incStep);
+        [[maybe_unused]] const float lpCoef = g.lpCoef, gainStepL = g.gainStepL, gainStepR = g.gainStepR;
+        [[maybe_unused]] float lpL = g.lpL, lpR = g.lpR;
         float winPos = g.winPos;
         const float winInc = rising ? g.winInc : g.winIncB;
         float fade = g.fade;
         const float fadeStep = g.fadeStep;
         const float* table = g.table;
-        const float gainL = g.gainL, gainR = g.gainR;
+        float gainL = g.gainL, gainR = g.gainR;
         float* outL = wetL + i;
         float* outR = wetR + i;
 
@@ -356,8 +419,21 @@ void GrainEngine::renderGrain (Grain& g, float* wetL, float* wetR, int numSample
             const int wi = static_cast<int> (winPos);
             const float wf = winPos - static_cast<float> (wi);
             const float window = (table[wi] + wf * (table[wi + 1] - table[wi])) * fade;
-            outL[s] += sampleL * window * gainL;
-            outR[s] += sampleR * window * gainR;
+            if constexpr (spatial)
+            {
+                lpL += lpCoef * (sampleL - lpL);
+                lpR += lpCoef * (sampleR - lpR);
+                outL[s] += lpL * window * gainL;
+                outR[s] += lpR * window * gainR;
+                gainL += gainStepL;
+                gainR += gainStepR;
+                inc += incStep;
+            }
+            else
+            {
+                outL[s] += sampleL * window * gainL;
+                outR[s] += sampleR * window * gainR;
+            }
 
             phase += inc;
             winPos += winInc;
@@ -365,6 +441,14 @@ void GrainEngine::renderGrain (Grain& g, float* wetL, float* wetR, int numSample
         }
 
         g.phase = phase;
+        if constexpr (spatial)
+        {
+            g.inc = static_cast<int64_t> (inc);
+            g.lpL = lpL;
+            g.lpR = lpR;
+            g.gainL = gainL;
+            g.gainR = gainR;
+        }
         g.winPos = std::min (winPos, static_cast<float> (tableSize));
         g.fade = fade;
         g.remaining -= count;
@@ -386,10 +470,17 @@ void GrainEngine::renderGrains (float* wetL, float* wetR, int numSamples, bool u
     {
         const int index = activeList[static_cast<size_t> (a)];
         auto& g = grains[static_cast<size_t> (index)];
-        if (useHermite)
-            renderGrain<true> (g, wetL, wetR, numSamples);
+        if (g.spatial)
+        {
+            if (useHermite)
+                renderGrain<true, true> (g, wetL, wetR, numSamples);
+            else
+                renderGrain<false, true> (g, wetL, wetR, numSamples);
+        }
+        else if (useHermite)
+            renderGrain<true, false> (g, wetL, wetR, numSamples);
         else
-            renderGrain<false> (g, wetL, wetR, numSamples);
+            renderGrain<false, false> (g, wetL, wetR, numSamples);
 
         if (g.remaining <= 0)
         {
@@ -435,6 +526,26 @@ void GrainEngine::schedule (const EngineParams& p, int n) noexcept
         }
         nextSpawn = std::max (0.0, nextSpawn - static_cast<double> (n));
         nextSpawn = std::min (nextSpawn, interval * 2.0);
+    }
+    else if (p.triggerMode == triggerOnset)
+    {
+        // Each detected attack starts a burst of grains spaced by the density.
+        const int onset = analysis.getOnsetOffset();
+        if (onset >= 0)
+        {
+            burstRemaining = std::clamp (p.onsetBurst, 1, 16);
+            nextBurst = static_cast<double> (onset);
+        }
+        const double interval = fs / std::max (0.5, static_cast<double> (p.density));
+        while (burstRemaining > 0 && nextBurst < static_cast<double> (n))
+        {
+            spawnGrain (p, std::max (0, static_cast<int> (nextBurst)), rng.uni(), p.density);
+            nextBurst += std::max (1.0, interval * (1.0 + 0.95 * static_cast<double> (p.jitter * rng.bi())));
+            --burstRemaining;
+        }
+        if (burstRemaining > 0)
+            nextBurst -= static_cast<double> (n);
+        nextSpawn = 0.0;
     }
     else if (p.triggerMode == triggerSync)
     {
@@ -482,6 +593,12 @@ void GrainEngine::schedule (const EngineParams& p, int n) noexcept
 void GrainEngine::enterFreeze() noexcept
 {
     frozen = true;
+    evolveOffset = 0;
+    wearLp[0] = wearLp[1] = 0.0f;
+    evolvePeak = 0.0f;
+    evolveEnvOld = evolveEnvWet = 0.0f;
+    dcBlocker.reset();
+    evolveBin = -1;
 
     // Fade the newest audio to zero and clear a guard zone after the write head, so a grain
     // that reaches the seam reads a smooth fade into silence instead of stale audio.
@@ -513,6 +630,91 @@ void GrainEngine::enterFreeze() noexcept
     }
 }
 
+/** Turns an independent uniform draw into one that follows the previous grain. At amount 1 the
+    value only wanders slowly, so successive grains move together like a flock. */
+float GrainEngine::flocked (float& state, float uniform, float amount) noexcept
+{
+    const float freedom = 1.0f - amount;
+    const float step = std::max (0.02f, 2.0f * freedom * freedom);
+    float next = std::abs (state + step * (uniform * 2.0f - 1.0f));
+    next -= 2.0f * std::floor (next * 0.5f);
+    if (next > 1.0f)
+        next = 2.0f - next;
+    state = next;
+    return next;
+}
+
+/** Living buffer: while frozen, a rewrite head loops through the held audio. Evolve blends the
+    grain cloud back into it and Wear erodes it a little more at each pass. */
+void GrainEngine::evolveBuffer (const EngineParams& p, const float* wetL, const float* wetR, int n) noexcept
+{
+    // The rewrite head covers the audio grains can reach: one pass lasts 12 seconds.
+    const int64_t regionLength = std::min (static_cast<int64_t> (bufferLength) - guardFrames,
+                                           static_cast<int64_t> (maxDelayFrames) + maxSpanFrames);
+    const int64_t edgeFrames = 4 * static_cast<int64_t> (fadeFrames);
+    // Equal-power blend: uncorrelated material keeps its level from one pass to the next.
+    const float angle = 0.6f * std::clamp (p.evolve, 0.0f, 1.0f) * 0.5f * kPi;
+    const float keepGain = std::cos (angle), cloudGain = std::sin (angle);
+    const float envCoef = onePoleCoef (0.1f, static_cast<float> (fs));
+    const float wear = std::clamp (p.wear, 0.0f, 1.0f);
+    const float wearCoef = 1.0f - std::exp (-kTwoPi * 4000.0f / static_cast<float> (fs));
+    // Each sample is visited once per pass: at 100 % wear a pass loses about 2 dB.
+    const float loss = wear * 0.2f;
+    const int head = overviewIndex.load (std::memory_order_relaxed);
+
+    for (int i = 0; i < n; ++i)
+    {
+        // Both ends of the frozen region keep the fades made by enterFreeze.
+        const int64_t toEdge = std::min (evolveOffset, regionLength - 1 - evolveOffset);
+        const float edge = std::min (1.0f, static_cast<float> (toEdge) / static_cast<float> (edgeFrames));
+        const int64_t frame = writePos - regionLength + evolveOffset;
+        const auto idx = static_cast<size_t> ((static_cast<uint64_t> (frame) & mask) << 1);
+
+        float left = buffer[idx];
+        float right = buffer[idx + 1];
+        wearLp[0] += wearCoef * (left - wearLp[0]);
+        wearLp[1] += wearCoef * (right - wearLp[1]);
+        const float dull = 0.5f * wear * edge;
+        left += dull * (wearLp[0] - left);
+        right += dull * (wearLp[1] - right);
+        const float keep = 1.0f - loss * edge;
+        left *= keep;
+        right *= keep;
+
+        // The cloud is matched to the level of the audio it replaces, so the buffer keeps its
+        // dynamics while its material changes, and the loop cannot run away.
+        const float cloudL = dcBlocker.process (0, wetL[i]);
+        const float cloudR = dcBlocker.process (1, wetR[i]);
+        evolveEnvOld += envCoef * (std::max (std::abs (left), std::abs (right)) - evolveEnvOld);
+        evolveEnvWet += envCoef * (std::max (std::abs (cloudL), std::abs (cloudR)) - evolveEnvWet);
+        float match = std::min (2.0f, evolveEnvOld / (evolveEnvWet + 1.0e-6f));
+        if (evolveEnvOld > 0.5f)
+            match *= 0.5f / evolveEnvOld;
+        left = left * (1.0f + edge * (keepGain - 1.0f)) + softClip (cloudL * match) * edge * cloudGain;
+        right = right * (1.0f + edge * (keepGain - 1.0f)) + softClip (cloudR * match) * edge * cloudGain;
+        buffer[idx] = left;
+        buffer[idx + 1] = right;
+
+        // Keep the overview in step with the rewritten audio.
+        const int64_t behind = regionLength - 1 - evolveOffset;
+        const auto binsBehind = static_cast<int> (behind / framesPerOverviewBin);
+        if (binsBehind != evolveBin)
+        {
+            if (evolveBin >= 0 && evolveBin < overviewSize)
+            {
+                const int bin = ((head - 1 - evolveBin) % overviewSize + overviewSize) % overviewSize;
+                overview[static_cast<size_t> (bin)].store (evolvePeak, std::memory_order_relaxed);
+            }
+            evolveBin = binsBehind;
+            evolvePeak = 0.0f;
+        }
+        evolvePeak = std::max (evolvePeak, std::max (std::abs (left), std::abs (right)));
+
+        if (++evolveOffset >= regionLength)
+            evolveOffset = 0;
+    }
+}
+
 void GrainEngine::updateEffectParams (const EngineParams& p) noexcept
 {
     if (p.filterOn)
@@ -539,6 +741,15 @@ void GrainEngine::updateEffectParams (const EngineParams& p) noexcept
             diffuser.reset();
     }
     diffWasOn = p.diffOn;
+
+    if (p.resOn)
+    {
+        resonator.setParams (scaleMask (p.scale, p.customMask), p.root, p.resOctave, p.resDecay, p.resDamp, p.resMix,
+                             p.quality == qualityEco ? 4 : Resonator::maxLines);
+        if (! resWasOn)
+            resonator.reset();
+    }
+    resWasOn = p.resOn;
 }
 
 void GrainEngine::applyEffects (const EngineParams& p, int place, float* left, float* right, int n) noexcept
@@ -547,6 +758,8 @@ void GrainEngine::applyEffects (const EngineParams& p, int place, float* left, f
         filter.process (left, right, n);
     if (p.satOn && p.satPlace == place)
         saturator.process (left, right, n);
+    if (p.resOn && p.resPlace == place)
+        resonator.process (left, right, n);
     if (p.diffOn && p.diffPlace == place)
         diffuser.process (left, right, n);
 }
@@ -595,6 +808,15 @@ void GrainEngine::process (const float* inL, const float* inR, float* outL, floa
         inputPeak = std::max (inputPeak, level);
         duckEnv += (level > duckEnv ? attack : release) * (level - duckEnv);
         duck[i] = 1.0f - p.duckAmount * std::min (1.0f, duckEnv * 4.0f);
+    }
+
+    analysis.process (x[0], x[1], n, p.onsetSens);
+    analysisValues.onset = analysis.getOnsetOffset() >= 0;
+    analysisValues.brightness = analysis.getBrightness();
+    {
+        const float note = tracker.latestNote();
+        if (! std::isnan (note))
+            analysisValues.pitch = std::clamp ((note - 60.0f) / 24.0f, -1.0f, 1.0f);
     }
 
     // Freeze transitions.
@@ -698,6 +920,10 @@ void GrainEngine::process (const float* inL, const float* inR, float* outL, floa
             writePos += n;
             tracker.process (mono, n);
             silentWriteFrames = writePeak < kSilence ? std::min<int64_t> (silentWriteFrames + n, bufferLength) : 0;
+        }
+        else if (p.evolve > 1.0e-4f || p.wear > 1.0e-4f)
+        {
+            evolveBuffer (p, wet[0], wet[1], n);
         }
 
         applyEffects (p, placePost, wet[0], wet[1], n);
@@ -806,6 +1032,7 @@ int GrainEngine::fillGrainViews (GrainView* destination, int maxViews) const noe
         view.pitch = g.pitch;
         view.pan = g.pan;
         view.spanNorm = g.span * invDelay * (g.inc < 0 ? -1.0f : 1.0f);
+        view.depth = g.spatial ? g.depth : 0.0f;
         if (g.delay > 0 || g.table == nullptr)
             view.level = 0.0f;
         else

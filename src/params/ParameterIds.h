@@ -45,6 +45,14 @@ namespace pid
     inline constexpr const char* duckRelease  = "duckRelease";
     inline constexpr const char* limiter      = "limiter";
     inline constexpr const char* quality      = "quality";
+    inline constexpr const char* onsetSens    = "onsetSens";
+    inline constexpr const char* onsetBurst   = "onsetBurst";
+    inline constexpr const char* flock        = "flock";
+    inline constexpr const char* evolve       = "evolve";
+    inline constexpr const char* wear         = "wear";
+    inline constexpr const char* distance     = "distance";
+    inline constexpr const char* orbit        = "orbit";
+    inline constexpr const char* doppler      = "doppler";
 
     // Pitch and scale
     inline constexpr const char* scale        = "scale";
@@ -78,6 +86,12 @@ namespace pid
     inline constexpr const char* diffDamp     = "diffDamp";
     inline constexpr const char* diffMix      = "diffMix";
     inline constexpr const char* diffPlace    = "diffPlace";
+    inline constexpr const char* resOn        = "resOn";
+    inline constexpr const char* resMix       = "resMix";
+    inline constexpr const char* resDecay     = "resDecay";
+    inline constexpr const char* resDamp      = "resDamp";
+    inline constexpr const char* resOctave    = "resOctave";
+    inline constexpr const char* resPlace     = "resPlace";
 
     // Modulation sources
     inline juce::String lfoShape (int n)   { return "lfo" + juce::String (n) + "Shape"; }   // 1..4
@@ -94,13 +108,20 @@ namespace pid
     inline constexpr const char* envAttack  = "envAttack";
     inline constexpr const char* envRelease = "envRelease";
     inline constexpr const char* envGain    = "envGain";
+    inline constexpr const char* driftRate   = "driftRate";
+    inline constexpr const char* driftPull   = "driftPull";
+    inline constexpr const char* chaosRate   = "chaosRate";
+    inline constexpr const char* chaosShape  = "chaosShape";
+    inline constexpr const char* bounceRate  = "bounceRate";
+    inline constexpr const char* bounceDamp  = "bounceDamp";
+    inline constexpr const char* gestureRate = "gestureRate";
     inline juce::String macro (int n)      { return "macro" + juce::String (n); }           // 1..4
 }
 
 // ---------------------------------------------------------------------------------------------
 // Shared choice lists
 
-enum TriggerMode { triggerFree = 0, triggerSync, triggerPattern };
+enum TriggerMode { triggerFree = 0, triggerSync, triggerPattern, triggerOnset };
 enum WindowShape { windowHann = 0, windowTukey, windowTrapezoid, windowPerc, numWindowShapes };
 enum Quality { qualityEco = 0, qualityNormal, qualityHigh };
 enum FxPlace { placeFeedback = 0, placePost };
@@ -133,13 +154,16 @@ inline constexpr int divisionQuarter = 11;
 enum ModSource
 {
     srcLfo1 = 0, srcLfo2, srcLfo3, srcLfo4, srcRand1, srcRand2, srcEnv,
-    srcMacro1, srcMacro2, srcMacro3, srcMacro4, numModSources
+    srcMacro1, srcMacro2, srcMacro3, srcMacro4,
+    srcPitch, srcBright, srcOnset, srcDrift, srcChaos, srcBounce, srcGestureX, srcGestureY, numModSources
 };
 
 inline const char* modSourceName (int s)
 {
     static const char* names[] = { "LFO 1", "LFO 2", "LFO 3", "LFO 4", "Random 1", "Random 2",
-                                   "Envelope", "Macro 1", "Macro 2", "Macro 3", "Macro 4" };
+                                   "Envelope", "Macro 1", "Macro 2", "Macro 3", "Macro 4",
+                                   "Pitch", "Brightness", "Onset", "Drift", "Chaos", "Bounce",
+                                   "Gesture X", "Gesture Y" };
     return (s >= 0 && s < numModSources) ? names[s] : "None";
 }
 
@@ -154,6 +178,7 @@ enum ModDest
     dstFilterCutoff, dstFilterReso, dstSatDrive,
     dstDiffSize, dstDiffDecay, dstDiffDamp, dstDiffMix,
     dstLfo1Rate, dstLfo2Rate, dstLfo3Rate, dstLfo4Rate, dstRand1Rate, dstRand2Rate,
+    dstFlock, dstEvolve, dstWear, dstDistance, dstOrbit, dstDoppler, dstResMix, dstResDecay,
     numModDests
 };
 
@@ -197,6 +222,14 @@ inline juce::String modDestParamId (int d)
             return pid::lfoRate (d - dstLfo1Rate + 1);
         case dstRand1Rate: case dstRand2Rate:
             return pid::randRate (d - dstRand1Rate + 1);
+        case dstFlock:    return pid::flock;
+        case dstEvolve:   return pid::evolve;
+        case dstWear:     return pid::wear;
+        case dstDistance: return pid::distance;
+        case dstOrbit:    return pid::orbit;
+        case dstDoppler:  return pid::doppler;
+        case dstResMix:   return pid::resMix;
+        case dstResDecay: return pid::resDecay;
         default: break;
     }
     return {};

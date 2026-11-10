@@ -6,6 +6,7 @@
 // modulation matrix. Sources are evaluated at control rate, once per sub-block.
 #pragma once
 
+#include "../dsp/Analysis.h"
 #include "../dsp/Util.h"
 #include "../params/ParameterIds.h"
 #include <juce_data_structures/juce_data_structures.h>
@@ -14,6 +15,15 @@
 
 namespace grn
 {
+
+/** A recorded XY gesture, replayed in a loop as two modulation sources. */
+struct GestureData
+{
+    static constexpr int maxPoints = 512;
+    int count = 0;          // 0 = no gesture
+    float seconds = 1.0f;   // duration of one loop at rate 1
+    std::array<float, maxPoints> x {}, y {}; // -1..1
+};
 
 /** Settings of every modulation source for one sub-block. */
 struct ModSourceParams
@@ -31,6 +41,11 @@ struct ModSourceParams
     int envSource = 0;            // 0 input, 1 output
     float envAttackMs = 10.0f, envReleaseMs = 200.0f, envGain = 1.0f;
     float macro[numMacros] {};    // 0..1
+    float driftRate = 0.2f, driftPull = 0.3f;
+    float chaosRate = 0.3f, chaosShape = 0.0f;
+    float bounceRate = 1.0f, bounceDamp = 0.3f;
+    float gestureRate = 1.0f;
+    const GestureData* gesture = nullptr;
     double bpm = 120.0, ppq = 0.0;
     bool playing = false;
 };
@@ -51,13 +66,21 @@ public:
         for (auto& random : randoms)
             random = {};
         envelope = 0.0f;
+        onsetEnv = 0.0f;
+        pitchHeld = 0.0f;
+        drift = 0.0f;
+        lorenzX = 1.0f; lorenzY = 1.0f; lorenzZ = 20.0f;
+        ballHeight = 1.0f; ballSpeed = 0.0f;
+        gesturePhase = 0.0;
+        motionRng.seed (0x51ed270bu);
         values.fill (0.0f);
         wasPlaying = false;
         macrosPrimed = false;
     }
 
     /** Advances every source by numSamples. The peaks are the levels of the previous sub-block. */
-    void process (const ModSourceParams& p, int numSamples, float inputPeak, float outputPeak) noexcept
+    void process (const ModSourceParams& p, int numSamples, float inputPeak, float outputPeak,
+                  const AnalysisValues& analysis = {}) noexcept
     {
         const double seconds = static_cast<double> (numSamples) / fs;
         const double bpm = std::clamp (p.bpm, 20.0, 999.0);
@@ -149,6 +172,103 @@ public:
                 value += coef * (p.macro[n] - value);
             }
         }
+
+        processMotion (p, static_cast<float> (seconds), analysis);
+    }
+
+    /** Sources that listen to the input or move on their own (added after the first version). */
+    void processMotion (const ModSourceParams& p, float seconds, const AnalysisValues& analysis) noexcept
+    {
+        // Listening sources.
+        pitchHeld += 0.3f * (analysis.pitch - pitchHeld);
+        values[srcPitch] = pitchHeld;
+        values[srcBright] = analysis.brightness;
+        if (analysis.onset)
+            onsetEnv = 1.0f;
+        else
+            onsetEnv *= std::exp (-seconds / (std::max (10.0f, p.envReleaseMs) * 0.001f));
+        values[srcOnset] = onsetEnv;
+
+        // Drift: a random walk between -1 and 1, pulled back to the centre.
+        {
+            const float rate = std::max (0.01f, p.driftRate);
+            const float noise = motionRng.bi() + motionRng.bi() + motionRng.bi();
+            drift += -4.0f * rate * p.driftPull * drift * seconds + 1.2f * std::sqrt (rate * seconds) * noise;
+            if (drift > 1.0f)
+                drift = 2.0f - drift;
+            else if (drift < -1.0f)
+                drift = -2.0f - drift;
+            drift = std::clamp (drift, -1.0f, 1.0f);
+            values[srcDrift] = drift;
+        }
+
+        // Chaos: Lorenz attractor. One lobe turn lasts about 0.65 time units.
+        {
+            const float total = std::min (0.25f, seconds * std::max (0.01f, p.chaosRate) * 0.65f);
+            const int steps = std::max (1, static_cast<int> (std::ceil (total / 0.004f)));
+            const float dt = total / static_cast<float> (steps);
+            for (int s = 0; s < steps; ++s)
+            {
+                const float dx = 10.0f * (lorenzY - lorenzX);
+                const float dy = lorenzX * (28.0f - lorenzZ) - lorenzY;
+                const float dz = lorenzX * lorenzY - (8.0f / 3.0f) * lorenzZ;
+                lorenzX += dx * dt;
+                lorenzY += dy * dt;
+                lorenzZ += dz * dt;
+            }
+            if (! (std::abs (lorenzX) < 100.0f && std::abs (lorenzY) < 100.0f && std::abs (lorenzZ) < 200.0f))
+            {
+                lorenzX = 1.0f; lorenzY = 1.0f; lorenzZ = 20.0f;
+            }
+            const float wing = std::clamp (lorenzX / 20.0f, -1.0f, 1.0f);
+            const float height = std::clamp ((lorenzZ - 24.0f) / 20.0f, -1.0f, 1.0f);
+            values[srcChaos] = wing + std::clamp (p.chaosShape, 0.0f, 1.0f) * (height - wing);
+        }
+
+        // Bounce: a ball dropped from 1, relaunched when it comes to rest or on an onset.
+        {
+            const float rate = std::max (0.1f, p.bounceRate);
+            const float gravity = 8.0f * rate * rate;
+            const float restitution = 0.95f - 0.6f * std::clamp (p.bounceDamp, 0.0f, 1.0f);
+            if (analysis.onset)
+            {
+                ballHeight = 1.0f;
+                ballSpeed = 0.0f;
+            }
+            ballSpeed -= gravity * seconds;
+            ballHeight += ballSpeed * seconds;
+            if (ballHeight < 0.0f)
+            {
+                ballHeight = -ballHeight * restitution;
+                ballSpeed = -ballSpeed * restitution;
+                if (ballSpeed * ballSpeed < 0.04f * gravity)
+                {
+                    ballHeight = 1.0f;
+                    ballSpeed = 0.0f;
+                }
+            }
+            ballHeight = std::clamp (ballHeight, 0.0f, 1.0f);
+            values[srcBounce] = ballHeight;
+        }
+
+        // Gesture: loops through the recorded points with linear interpolation.
+        if (p.gesture != nullptr && p.gesture->count > 1)
+        {
+            const auto& g = *p.gesture;
+            gesturePhase += static_cast<double> (seconds * p.gestureRate / std::max (0.05f, g.seconds));
+            gesturePhase -= std::floor (gesturePhase);
+            const float position = static_cast<float> (gesturePhase) * static_cast<float> (g.count - 1);
+            const int index = std::clamp (static_cast<int> (position), 0, g.count - 2);
+            const float t = position - static_cast<float> (index);
+            const auto i = static_cast<size_t> (index);
+            values[srcGestureX] = g.x[i] + t * (g.x[i + 1] - g.x[i]);
+            values[srcGestureY] = g.y[i] + t * (g.y[i + 1] - g.y[i]);
+        }
+        else
+        {
+            values[srcGestureX] = 0.0f;
+            values[srcGestureY] = 0.0f;
+        }
     }
 
     float value (int source) const noexcept { return values[static_cast<size_t> (source)]; }
@@ -173,6 +293,11 @@ private:
     std::array<float, numModSources> values {};
     float envelope = 0.0f;
     bool wasPlaying = false, macrosPrimed = false;
+    float onsetEnv = 0.0f, pitchHeld = 0.0f, drift = 0.0f;
+    float lorenzX = 1.0f, lorenzY = 1.0f, lorenzZ = 20.0f;
+    float ballHeight = 1.0f, ballSpeed = 0.0f;
+    double gesturePhase = 0.0;
+    Rng motionRng;
     Rng rng;
 };
 
