@@ -192,7 +192,7 @@ Measured with `granulr_bench` on a Ryzen 7 9800X3D, one core, as processing time
 | Worst case, 99th percentile | 7.9 % | 14.4 % | 17.6 % |
 | Worst case with a frozen, evolving buffer, mean | 7.3 % | 10.0 % | 11.2 % |
 
-Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 159 factory presets stays under 2.0 % mean at 96 kHz (99th percentile under 3 %, except one preset measured at 5.9 %). These figures move by a few points from one run to the next. In this run, the one case above 20 % at the 99th percentile is the worst case at 48 kHz with blocks of 1024 samples (22.1 %, mean 8.0 %). Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
+Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 159 factory presets stays under 2.0 % mean at 96 kHz (99th percentile under 6 %; it is under 3 % for all but six presets measured one after the other, during what looks like a disturbance on the test machine). These figures move by a few points from one run to the next. In this run, the one case above 20 % at the 99th percentile is the worst case at 48 kHz with blocks of 1024 samples (22.1 %, mean 8.0 %). Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
 
 When the input and the grain tail are silent the engine goes idle. With the editor closed, no analysis is done for the visualisers.
 
