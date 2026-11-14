@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Distant Reply" category="Ducked" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="duckAmount" value="85"/>
+    <PARAM id="duckRelease" value="500"/>
+    <PARAM id="size" value="400"/>
+    <PARAM id="density" value="18"/>
+    <PARAM id="spray" value="600"/>
+    <PARAM id="position" value="400"/>
+    <PARAM id="distance" value="90"/>
+    <PARAM id="orbit" value="40"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="feedback" value="35"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="50"/>
+    <PARAM id="diffDecay" value="70"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="duckAmount" depth="-0.5"/>
+    <SLOT source="8" dest="distance" depth="-0.5"/>
+  </MATRIX>
+</GranulrPreset>

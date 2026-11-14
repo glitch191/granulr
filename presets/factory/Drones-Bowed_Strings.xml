@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Bowed Strings" category="Drones" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="outputGain" value="-3"/>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="size" value="1300"/>
+    <PARAM id="density" value="9"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="spray" value="250"/>
+    <PARAM id="feedback" value="50"/>
+    <PARAM id="panSpread" value="70"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resMix" value="50"/>
+    <PARAM id="resDecay" value="90"/>
+    <PARAM id="resDamp" value="45"/>
+    <PARAM id="scale" value="10"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="40"/>
+    <PARAM id="diffDecay" value="85"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="3000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="14" dest="resMix" depth="0.15"/>
+    <SLOT source="7" dest="feedback" depth="0.2"/>
+    <SLOT source="8" dest="resDecay" depth="0.1"/>
+  </MATRIX>
+</GranulrPreset>

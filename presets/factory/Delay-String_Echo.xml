@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="String Echo" category="Delay" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="45"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="8"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="8"/>
+    <PARAM id="sizeSync" value="1"/>
+    <PARAM id="sizeDiv" value="8"/>
+    <PARAM id="feedback" value="45"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="1"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resPlace" value="0"/>
+    <PARAM id="resMix" value="35"/>
+    <PARAM id="resDecay" value="60"/>
+    <PARAM id="scale" value="5"/>
+    <PARAM id="root" value="9"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.3"/>
+    <SLOT source="8" dest="resMix" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

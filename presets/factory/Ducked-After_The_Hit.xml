@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="After The Hit" category="Ducked" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="triggerMode" value="3"/>
+    <PARAM id="onsetBurst" value="8"/>
+    <PARAM id="density" value="8"/>
+    <PARAM id="duckAmount" value="90"/>
+    <PARAM id="duckAttack" value="3"/>
+    <PARAM id="duckRelease" value="300"/>
+    <PARAM id="size" value="300"/>
+    <PARAM id="position" value="200"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="octaveUp" value="25"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="duckAmount" depth="-0.5"/>
+    <SLOT source="8" dest="octaveUp" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

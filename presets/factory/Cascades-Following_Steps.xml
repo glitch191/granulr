@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Following Steps" category="Cascades" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="scale" value="5"/>
+    <PARAM id="root" value="9"/>
+    <PARAM id="pitchRandom" value="10"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="5"/>
+    <PARAM id="size" value="130"/>
+    <PARAM id="position" value="200"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="flock" value="75"/>
+    <PARAM id="feedback" value="30"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="30"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="flock" depth="-0.6"/>
+    <SLOT source="8" dest="feedback" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

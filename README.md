@@ -29,26 +29,26 @@ Stereo in, stereo out. No MIDI input, no sidechain, no added latency.
 
 ### Typical uses
 
-The factory bank holds 120 presets in 16 categories:
+The factory bank holds 159 presets in 16 categories. The 12 classic categories also hold presets that use the cloud, buffer, resonator and listening features:
 
 | Category | Presets | What to expect |
 | :- | :- | :- |
-| Ambient | 10 | Slow clouds and washes behind the source |
-| Glitch | 10 | Tempo-synced chops, ratchets and stutters |
-| Shimmer | 9 | Pitched-up feedback through diffusion |
-| Frozen | 9 | Held buffer turned into pads (these presets switch Freeze on) |
-| Delay | 9 | Grain echoes, synced or loose |
-| Chorus | 7 | Thickening, detune and vibrato |
-| Reverse | 7 | Backward grains and swells |
-| Cascades | 8 | Random pitches quantised to a scale |
-| Lo-Fi | 8 | Wobble, band limiting and saturation |
-| Ducked | 6 | Textures that step back while the source plays |
-| Smear | 8 | Blurred transients, pad-like sustain |
-| Drones | 9 | Long feedback beds from short material |
-| Reactive | 6 | The playing drives the texture: Onset trigger, Pitch, Brightness and Onset sources |
-| Swarm | 5 | Flock, Distance, Orbit, Doppler, Drift and Chaos |
-| Living | 4 | Frozen buffers that keep changing with Evolve and Wear (these presets switch Freeze on) |
-| Strings | 5 | The resonator tuned to a scale |
+| Ambient | 14 | Slow clouds and washes behind the source |
+| Glitch | 13 | Tempo-synced chops, ratchets and stutters |
+| Shimmer | 12 | Pitched-up feedback through diffusion |
+| Frozen | 12 | Held buffer turned into pads (these presets switch Freeze on) |
+| Delay | 12 | Grain echoes, synced or loose |
+| Chorus | 9 | Thickening, detune and vibrato |
+| Reverse | 9 | Backward grains and swells |
+| Cascades | 11 | Random pitches quantised to a scale |
+| Lo-Fi | 10 | Wobble, band limiting and saturation ("Worn Loop" switches Freeze on) |
+| Ducked | 8 | Textures that step back while the source plays |
+| Smear | 10 | Blurred transients, pad-like sustain |
+| Drones | 11 | Long feedback beds from short material |
+| Reactive | 8 | The playing drives the texture: Onset trigger, Pitch, Brightness and Onset sources |
+| Swarm | 7 | Flock, Distance, Orbit, Doppler, Drift and Chaos |
+| Living | 6 | Frozen buffers that keep changing with Evolve and Wear (these presets switch Freeze on) |
+| Strings | 7 | The resonator tuned to a scale |
 
 In every preset Macro 1 and Macro 2 are routed to the controls that matter most for that sound, so turning them is the quickest way to adapt it. Presets are defined in `scripts/build-presets.sh`, which regenerates `presets/factory`.
 
@@ -188,11 +188,11 @@ Measured with `granulr_bench` on a Ryzen 7 9800X3D, one core, as processing time
 | Case | 48 kHz | 96 kHz | 192 kHz |
 | :- | :- | :- | :- |
 | Default settings, mean | 0.32 % | 0.43 % | 0.72 % |
-| Worst case (High quality, maximum density, every effect and every cloud feature on), mean | 8.4 % | 12.6 % | 13.9 % |
-| Worst case, 99th percentile | 12.0 % | 18.1 % | 19.9 % |
-| Worst case with a frozen, evolving buffer, mean | 7.8 % | 11.9 % | 13.4 % |
+| Worst case (High quality, maximum density, every effect and every cloud feature on), mean | 6.7 % | 10.3 % | 11.7 % |
+| Worst case, 99th percentile | 7.9 % | 14.4 % | 17.6 % |
+| Worst case with a frozen, evolving buffer, mean | 7.3 % | 10.0 % | 11.2 % |
 
-Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 120 factory presets stays under 1.8 % mean (2.9 % at the 99th percentile) at 96 kHz. The one case measured above 20 % at the 99th percentile is the worst case at 192 kHz with blocks of 32 samples (20.7 %). Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
+Bypassed, the plugin uses about 0.2 % at 48 kHz. Each of the 159 factory presets stays under 2.0 % mean at 96 kHz (99th percentile under 3 %, except one preset measured at 5.9 %). These figures move by a few points from one run to the next. In this run, the one case above 20 % at the 99th percentile is the worst case at 48 kHz with blocks of 1024 samples (22.1 %, mean 8.0 %). Isolated single blocks can take longer than the mean (see the "worst" column of the benchmark output); their cause has not been isolated.
 
 When the input and the grain tail are silent the engine goes idle. With the editor closed, no analysis is done for the visualisers.
 

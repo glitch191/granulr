@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Chaotic Scale" category="Cascades" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="scale" value="6"/>
+    <PARAM id="root" value="2"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="6"/>
+    <PARAM id="size" value="160"/>
+    <PARAM id="position" value="300"/>
+    <PARAM id="windowShape" value="3"/>
+    <PARAM id="panSpread" value="85"/>
+    <PARAM id="chaosRate" value="0.6"/>
+    <PARAM id="feedback" value="35"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="15" dest="pitch" depth="0.3"/>
+    <SLOT source="15" dest="position" depth="0.1"/>
+    <SLOT source="7" dest="feedback" depth="0.3"/>
+    <SLOT source="8" dest="size" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

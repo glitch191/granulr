@@ -566,4 +566,164 @@ preset "Glass Resonance" "Strings" \
   "mix=50 resOn=1 resMix=65 resDecay=70 resDamp=10 resOctave=2 scale=8 size=30 density=60 spray=800 position=400 jitter=100 panSpread=100 filterOn=1 filterType=1 filterCutoff=600 diffOn=1 diffMix=35" \
   "12:resMix:0.3 7:resDecay:0.25 8:density:0.3"
 
+# ---------------------------------------------------------------------------------------------
+# Second bank: the classic categories revisited with the cloud, buffer, resonator and
+# listening features.
+
+preset "Distant Shore" "Ambient" \
+  "mix=55 size=600 density=14 spray=1000 position=700 panSpread=100 distance=80 orbit=50 diffOn=1 diffMix=50 diffDecay=78 driftRate=0.1" \
+  "14:position:0.2 7:distance:-0.5 8:diffMix:0.3"
+
+preset "Wandering Light" "Ambient" \
+  "mix=50 size=260 density=22 spray=500 position=450 flock=60 octaveUp=20 scale=4 pitchRandom=5 panSpread=95 diffOn=1 diffMix=45 diffDecay=72 chaosRate=0.12" \
+  "15:position:0.2 14:panSpread:-0.2 7:flock:-0.5 8:octaveUp:0.4"
+
+preset "Sympathetic Air" "Ambient" \
+  "mix=50 size=450 density=16 spray=600 position=400 panSpread=85 resOn=1 resMix=35 resDecay=80 resDamp=40 scale=2 diffOn=1 diffMix=40 diffDecay=75" \
+  "14:resDecay:0.1 7:resMix:0.4 8:diffMix:0.3"
+
+preset "Breathing Room" "Ambient" \
+  "mix=50 size=500 density=12 spray=700 position=500 panSpread=90 feedback=25 filterOn=1 filterCutoff=3000 diffOn=1 diffMix=45 diffDecay=70 envAttack=80 envRelease=900" \
+  "6:size:0.3 6:diffMix:0.25 12:filterCutoff:0.3 7:feedback:0.3 8:spray:0.3"
+
+preset "Onset Scatter" "Glitch" \
+  "mix=60 triggerMode=3 onsetBurst=8 density=60 jitter=40 size=30 position=30 spray=400 reverse=40 windowShape=2 panSpread=100 pitchRandom=12 scale=9" \
+  "13:reverse:0.4 7:spray:0.4 8:pitchRandom:0.3"
+
+preset "Bouncing Ball" "Glitch" \
+  "mix=60 triggerMode=1 densityDiv=5 size=50 positionSync=1 positionDiv=8 spray=0 jitter=0 windowShape=3 panSpread=40 bounceRate=2 bounceDamp=25" \
+  "16:size:0.35 16:pitch:0.2 16:panSpread:0.5 7:reverse:0.6 8:feedback:0.4"
+
+preset "Chaos Engine" "Glitch" \
+  "mix=60 triggerMode=2 patternRate=5 size=60 position=300 spray=0 windowShape=2 panSpread=80 chaosRate=1.5 satOn=1 satType=1 satDrive=8 step3Ratchet=2 step6Gate=0 step9Ratchet=3 step12Gate=0 step15Ratchet=4" \
+  "15:position:0.3 15:pitch:0.2 7:satDrive:0.4 8:size:0.3"
+
+preset "Halo Strings" "Shimmer" \
+  "mix=45 pitch=12 feedback=50 size=260 density=24 spray=180 position=220 panSpread=80 resOn=1 resMix=40 resDecay=75 resOctave=1 scale=2 diffOn=1 diffPlace=0 diffMix=55 diffDecay=75" \
+  "7:feedback:0.25 8:resMix:0.4"
+
+preset "Far Lights" "Shimmer" \
+  "mix=45 octaveUp=70 voice1Interval=12 size=120 density=40 spray=400 position=300 panSpread=100 distance=90 orbit=70 feedback=40 diffOn=1 diffMix=55 diffDecay=78 filterOn=1 filterType=1 filterCutoff=600" \
+  "14:distance:-0.3 7:octaveUp:0.3 8:feedback:0.3"
+
+preset "Answering Halo" "Shimmer" \
+  "mix=45 triggerMode=3 onsetBurst=5 density=10 pitch=12 size=350 position=150 spray=100 windowSkew=40 feedback=45 panSpread=85 diffOn=1 diffPlace=0 diffMix=60 diffDecay=80" \
+  "13:diffMix:0.2 7:feedback:0.3 8:size:0.3"
+
+preset "Drifting Ice" "Frozen" \
+  "mix=85 freeze=1 size=600 density=14 spray=500 position=1500 panSpread=90 driftRate=0.08 driftPull=10 diffOn=1 diffMix=45 diffDecay=82" \
+  "14:position:0.35 7:spray:0.4 8:diffMix:0.4"
+
+preset "Frozen Flock" "Frozen" \
+  "mix=85 freeze=1 flock=90 size=250 density=30 spray=2000 position=2000 pitchRandom=5 scale=5 panSpread=100 diffOn=1 diffMix=35" \
+  "7:flock:-0.6 8:pitchRandom:0.3"
+
+preset "Held Strings" "Frozen" \
+  "mix=85 freeze=1 size=800 density=10 spray=700 position=800 panSpread=85 resOn=1 resMix=45 resDecay=85 resDamp=40 scale=3 root=9 diffOn=1 diffMix=40 diffDecay=80" \
+  "7:resMix:0.4 8:position:0.2"
+
+preset "Orbiting Echo" "Delay" \
+  "mix=45 triggerMode=1 densityDiv=8 positionSync=1 positionDiv=10 sizeSync=1 sizeDiv=10 feedback=50 spray=0 jitter=0 windowShape=1 orbit=100 doppler=40 panSpread=100 filterOn=1 filterPlace=0 filterCutoff=5000" \
+  "7:feedback:0.4 8:doppler:0.5"
+
+preset "Receding Echo" "Delay" \
+  "mix=45 triggerMode=1 densityDiv=11 positionSync=1 positionDiv=11 sizeSync=1 sizeDiv=11 feedback=65 spray=0 jitter=0 windowShape=1 distance=60 filterOn=1 filterPlace=0 filterCutoff=3500 diffOn=1 diffPlace=0 diffMix=20 diffSize=30 diffDecay=30" \
+  "7:feedback:0.3 8:distance:0.4"
+
+preset "String Echo" "Delay" \
+  "mix=45 triggerMode=1 densityDiv=8 positionSync=1 positionDiv=8 sizeSync=1 sizeDiv=8 feedback=45 spray=0 jitter=0 windowShape=1 resOn=1 resPlace=0 resMix=35 resDecay=60 scale=5 root=9" \
+  "7:feedback:0.3 8:resMix:0.4"
+
+preset "Drifting Ensemble" "Chorus" \
+  "mix=50 size=90 density=40 position=30 spray=12 panSpread=100 width=130 jitter=70 driftRate=0.4 driftPull=20 chaosRate=0.3" \
+  "14:fine:0.08 15:position:0.015 7:pitchRandom:0.08 8:width:0.25"
+
+preset "Leslie Orbit" "Chorus" \
+  "mix=70 size=70 density=50 position=20 spray=6 panSpread=80 orbit=100 doppler=60 jitter=50" \
+  "7:doppler:-0.5 8:orbit:-0.6"
+
+preset "Reverse Flock" "Reverse" \
+  "mix=60 reverse=100 flock=80 size=350 density=18 position=900 spray=1500 windowSkew=50 panSpread=100 diffOn=1 diffMix=35" \
+  "7:flock:-0.6 8:size:0.3"
+
+preset "Backward Answers" "Reverse" \
+  "mix=55 triggerMode=3 onsetBurst=3 density=4 reverse=100 size=500 position=30 spray=50 windowSkew=70 panSpread=60 diffOn=1 diffMix=35 diffDecay=60" \
+  "7:size:0.3 8:diffMix:0.4"
+
+preset "Following Steps" "Cascades" \
+  "mix=50 scale=5 root=9 pitchRandom=10 triggerMode=1 densityDiv=5 size=130 position=200 windowShape=3 panSpread=80 flock=75 feedback=30 diffOn=1 diffMix=30" \
+  "7:flock:-0.6 8:feedback:0.4"
+
+preset "Bell Cascade" "Cascades" \
+  "mix=50 scale=4 pitchRandom=16 octaveUp=30 triggerMode=3 onsetBurst=12 density=9 jitter=30 size=180 position=80 windowShape=3 panSpread=90 resOn=1 resMix=40 resDecay=70 resOctave=1 diffOn=1 diffMix=30" \
+  "7:pitchRandom:0.3 8:resMix:0.4"
+
+preset "Chaotic Scale" "Cascades" \
+  "mix=50 scale=6 root=2 triggerMode=1 densityDiv=6 size=160 position=300 windowShape=3 panSpread=85 chaosRate=0.6 feedback=35" \
+  "15:pitch:0.3 15:position:0.1 7:feedback:0.3 8:size:0.3"
+
+preset "Seasick Tape" "Lo-Fi" \
+  "mix=100 size=150 density=30 position=60 spray=8 panSpread=10 width=70 driftRate=0.5 driftPull=15 satOn=1 satDrive=10 filterOn=1 filterCutoff=4200" \
+  "14:fine:0.2 7:satDrive:0.3 8:filterCutoff:-0.3"
+
+preset "Worn Loop" "Lo-Fi" \
+  "mix=90 freeze=1 wear=80 evolve=30 size=200 density=24 position=600 spray=300 panSpread=30 satOn=1 satDrive=8 filterOn=1 filterCutoff=5000 lfo1Rate=0.4" \
+  "0:fine:0.08 7:wear:-0.6 8:filterCutoff:-0.3"
+
+preset "Distant Reply" "Ducked" \
+  "mix=50 duckAmount=85 duckRelease=500 size=400 density=18 spray=600 position=400 distance=90 orbit=40 panSpread=100 feedback=35 diffOn=1 diffMix=50 diffDecay=70" \
+  "7:duckAmount:-0.5 8:distance:-0.5"
+
+preset "After The Hit" "Ducked" \
+  "mix=50 triggerMode=3 onsetBurst=8 density=8 duckAmount=90 duckAttack=3 duckRelease=300 size=300 position=200 spray=300 octaveUp=25 panSpread=90 diffOn=1 diffMix=45" \
+  "7:duckAmount:-0.5 8:octaveUp:0.4"
+
+preset "Swarm Blur" "Smear" \
+  "mix=65 flock=70 size=120 density=90 position=150 spray=600 jitter=100 panSpread=90 diffOn=1 diffMix=30 diffSize=30 diffDecay=30" \
+  "7:flock:-0.6 8:spray:0.3"
+
+preset "Depth Of Field" "Smear" \
+  "mix=65 distance=100 size=200 density=70 position=120 spray=250 jitter=100 panSpread=80" \
+  "12:distance:-0.5 7:distance:-0.6 8:size:0.3"
+
+preset "Bowed Strings" "Drones" \
+  "outputGain=-3 mix=85 size=1300 density=9 position=300 spray=250 feedback=50 panSpread=70 resOn=1 resMix=50 resDecay=90 resDamp=45 scale=10 diffOn=1 diffMix=40 diffDecay=85 filterOn=1 filterPlace=0 filterCutoff=3000" \
+  "14:resMix:0.15 7:feedback:0.2 8:resDecay:0.1"
+
+preset "Slow Chaos Bed" "Drones" \
+  "mix=85 size=1500 density=7 position=500 spray=600 feedback=62 pitch=-12 panSpread=85 chaosRate=0.05 driftRate=0.04 diffOn=1 diffPlace=0 diffMix=50 diffDecay=88 filterOn=1 filterPlace=0 filterCutoff=2600" \
+  "15:filterCutoff:0.2 14:position:0.2 7:feedback:0.2 8:pitch:0.25"
+
+preset "Louder Is Wider" "Reactive" \
+  "mix=50 size=180 density=28 position=150 spray=100 panSpread=20 width=60" \
+  "6:panSpread:0.6 6:width:0.4 6:spray:0.3 7:density:0.3 8:size:0.3"
+
+preset "Low Notes Go Deep" "Reactive" \
+  "mix=55 size=320 density=20 position=350 spray=400 panSpread=85 distance=50 diffOn=1 diffMix=40" \
+  "11:distance:-0.5 11:size:-0.3 12:diffMix:-0.3 7:spray:0.3 8:diffMix:0.3"
+
+preset "Fireflies" "Swarm" \
+  "mix=50 size=25 density=35 spray=2000 position=1500 jitter=100 panSpread=100 flock=40 distance=80 orbit=100 octaveUp=40 scale=4 pitchRandom=12 windowShape=3 diffOn=1 diffMix=40 diffDecay=65" \
+  "14:density:0.3 7:flock:0.5 8:octaveUp:0.4"
+
+preset "Slow Migration" "Swarm" \
+  "mix=60 flock=97 size=500 density=12 spray=2000 position=2500 pitchRandom=3 panSpread=100 orbit=50 diffOn=1 diffMix=45 diffDecay=75" \
+  "7:flock:-0.5 8:pitchRandom:0.3"
+
+preset "Tape Decay" "Living" \
+  "mix=85 freeze=1 wear=100 size=350 density=18 spray=500 position=700 panSpread=60 satOn=1 satDrive=6 lfo1Rate=0.3" \
+  "0:fine:0.06 7:wear:-0.8 8:spray:0.4"
+
+preset "Growing Chord" "Living" \
+  "mix=85 freeze=1 evolve=60 voice2Prob=50 voice3Prob=30 scale=2 size=600 density=14 spray=900 position=900 panSpread=90 diffOn=1 diffMix=45 diffDecay=80" \
+  "7:evolve:-0.6 8:voice3Prob:0.4"
+
+preset "Octave Bells" "Strings" \
+  "mix=55 resOn=1 resMix=70 resDecay=80 resDamp=15 resOctave=1 scale=9 root=4 triggerMode=3 onsetBurst=3 density=20 size=25 position=20 windowShape=3 panSpread=90" \
+  "7:resDecay:0.2 8:resMix:-0.5"
+
+preset "Tanpura Bed" "Strings" \
+  "outputGain=-2 mix=60 resOn=1 resMix=60 resDecay=90 resDamp=35 resOctave=-1 scale=10 root=2 size=400 density=14 position=200 spray=300 jitter=60 panSpread=70 driftRate=0.2" \
+  "14:resMix:0.15 7:resDecay:0.1 8:spray:0.3"
+
 echo "Wrote $(ls "$out"/*.xml | wc -l) presets to $out"

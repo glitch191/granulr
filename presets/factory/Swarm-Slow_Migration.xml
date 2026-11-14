@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Slow Migration" category="Swarm" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="60"/>
+    <PARAM id="flock" value="97"/>
+    <PARAM id="size" value="500"/>
+    <PARAM id="density" value="12"/>
+    <PARAM id="spray" value="2000"/>
+    <PARAM id="position" value="2500"/>
+    <PARAM id="pitchRandom" value="3"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="orbit" value="50"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="75"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="flock" depth="-0.5"/>
+    <SLOT source="8" dest="pitchRandom" depth="0.3"/>
+  </MATRIX>
+</GranulrPreset>

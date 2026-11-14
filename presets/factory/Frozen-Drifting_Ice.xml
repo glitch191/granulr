@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Drifting Ice" category="Frozen" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="85"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="size" value="600"/>
+    <PARAM id="density" value="14"/>
+    <PARAM id="spray" value="500"/>
+    <PARAM id="position" value="1500"/>
+    <PARAM id="panSpread" value="90"/>
+    <PARAM id="driftRate" value="0.08"/>
+    <PARAM id="driftPull" value="10"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="82"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="14" dest="position" depth="0.35"/>
+    <SLOT source="7" dest="spray" depth="0.4"/>
+    <SLOT source="8" dest="diffMix" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Worn Loop" category="Lo-Fi" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="90"/>
+    <PARAM id="freeze" value="1"/>
+    <PARAM id="wear" value="80"/>
+    <PARAM id="evolve" value="30"/>
+    <PARAM id="size" value="200"/>
+    <PARAM id="density" value="24"/>
+    <PARAM id="position" value="600"/>
+    <PARAM id="spray" value="300"/>
+    <PARAM id="panSpread" value="30"/>
+    <PARAM id="satOn" value="1"/>
+    <PARAM id="satDrive" value="8"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterCutoff" value="5000"/>
+    <PARAM id="lfo1Rate" value="0.4"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="0" dest="fine" depth="0.08"/>
+    <SLOT source="7" dest="wear" depth="-0.6"/>
+    <SLOT source="8" dest="filterCutoff" depth="-0.3"/>
+  </MATRIX>
+</GranulrPreset>

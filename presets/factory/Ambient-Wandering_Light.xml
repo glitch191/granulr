@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Wandering Light" category="Ambient" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="50"/>
+    <PARAM id="size" value="260"/>
+    <PARAM id="density" value="22"/>
+    <PARAM id="spray" value="500"/>
+    <PARAM id="position" value="450"/>
+    <PARAM id="flock" value="60"/>
+    <PARAM id="octaveUp" value="20"/>
+    <PARAM id="scale" value="4"/>
+    <PARAM id="pitchRandom" value="5"/>
+    <PARAM id="panSpread" value="95"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffMix" value="45"/>
+    <PARAM id="diffDecay" value="72"/>
+    <PARAM id="chaosRate" value="0.12"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="15" dest="position" depth="0.2"/>
+    <SLOT source="14" dest="panSpread" depth="-0.2"/>
+    <SLOT source="7" dest="flock" depth="-0.5"/>
+    <SLOT source="8" dest="octaveUp" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

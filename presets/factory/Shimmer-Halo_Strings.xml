@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Halo Strings" category="Shimmer" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="45"/>
+    <PARAM id="pitch" value="12"/>
+    <PARAM id="feedback" value="50"/>
+    <PARAM id="size" value="260"/>
+    <PARAM id="density" value="24"/>
+    <PARAM id="spray" value="180"/>
+    <PARAM id="position" value="220"/>
+    <PARAM id="panSpread" value="80"/>
+    <PARAM id="resOn" value="1"/>
+    <PARAM id="resMix" value="40"/>
+    <PARAM id="resDecay" value="75"/>
+    <PARAM id="resOctave" value="1"/>
+    <PARAM id="scale" value="2"/>
+    <PARAM id="diffOn" value="1"/>
+    <PARAM id="diffPlace" value="0"/>
+    <PARAM id="diffMix" value="55"/>
+    <PARAM id="diffDecay" value="75"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.25"/>
+    <SLOT source="8" dest="resMix" depth="0.4"/>
+  </MATRIX>
+</GranulrPreset>

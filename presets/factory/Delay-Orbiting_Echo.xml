@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GranulrPreset name="Orbiting Echo" category="Delay" formatVersion="1">
+  <PARAMETERS>
+    <PARAM id="mix" value="45"/>
+    <PARAM id="triggerMode" value="1"/>
+    <PARAM id="densityDiv" value="8"/>
+    <PARAM id="positionSync" value="1"/>
+    <PARAM id="positionDiv" value="10"/>
+    <PARAM id="sizeSync" value="1"/>
+    <PARAM id="sizeDiv" value="10"/>
+    <PARAM id="feedback" value="50"/>
+    <PARAM id="spray" value="0"/>
+    <PARAM id="jitter" value="0"/>
+    <PARAM id="windowShape" value="1"/>
+    <PARAM id="orbit" value="100"/>
+    <PARAM id="doppler" value="40"/>
+    <PARAM id="panSpread" value="100"/>
+    <PARAM id="filterOn" value="1"/>
+    <PARAM id="filterPlace" value="0"/>
+    <PARAM id="filterCutoff" value="5000"/>
+  </PARAMETERS>
+  <MATRIX>
+    <SLOT source="7" dest="feedback" depth="0.4"/>
+    <SLOT source="8" dest="doppler" depth="0.5"/>
+  </MATRIX>
+</GranulrPreset>
