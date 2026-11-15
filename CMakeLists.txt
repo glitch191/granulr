@@ -35,7 +35,7 @@ FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(granulr
     VERSION ${GRANULR_VERSION_CLEAN}
-    COMPANY_NAME "granulr"
+    COMPANY_NAME "glitch191"
     PLUGIN_MANUFACTURER_CODE Grnr
     PLUGIN_CODE Gr01
     FORMATS VST3 Standalone
